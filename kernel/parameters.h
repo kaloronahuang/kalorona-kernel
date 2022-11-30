@@ -6,6 +6,6 @@
 
 #define PARAMETERS_H
 
-#define MAX_CPU 8
+#define MAX_CPU 16
 
 #endif
