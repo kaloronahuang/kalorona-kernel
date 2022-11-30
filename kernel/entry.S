@@ -22,7 +22,7 @@ __entry:
     mul a0, a1, a0
     add sp, sp, a0
     # Go!
-    call kalorona_entrypoint
+    call kernel_entrypoint
 # Doing nothing;
 spin:
     j spin
