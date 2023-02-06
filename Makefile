@@ -28,11 +28,14 @@ clean:
 	kernel/kernel.bin
 
 QEMU = qemu-system-riscv64
-QEMU_FLAGS = -machine virt -bios none -kernel kernel/kernel.bin -m 128M -nographic
-QEMU_DEBUG_FLAGS = -gdb tcp::25501 -S
+GDB_PORT = 25501
+QEMU_FLAGS = -machine virt -kernel kernel/kernel.bin -m 128M -nographic
+QEMU_FLAGS += -bios $(SBI_BUILD)
+QEMU_DEBUG_FLAGS = -gdb tcp::$(GDB_PORT) -S
 
 qemu: kernel/kernel.bin
 	$(QEMU) $(QEMU_FLAGS)
 
 qemu-debug: kernel/kernel.bin
+	echo "Now QEMU started with debugging port binded at $(GDB_PORT)"
 	$(QEMU) $(QEMU_FLAGS) $(QEMU_DEBUG_FLAGS)

@@ -9,7 +9,8 @@ ENTRY( __entry )
 
 SECTIONS
 {
-    . = 0x80000000;
+    /* Booting the kernel using OpenSBI now */
+    . = 0x80200000;
 
     .text : {
         *(.text .text.*)
