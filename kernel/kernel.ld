@@ -1,6 +1,5 @@
 /*
-    kalorona-posix
-    This is a file indicating the file organization;
+    kernel.ld
 */
 
 OUTPUT_ARCH( "riscv" )
@@ -11,9 +10,17 @@ SECTIONS
 {
     /* Booting the kernel using OpenSBI now */
     . = 0x80200000;
+    
+    .entry : {
+        *(.entry .entry.*)
+        . = ALIGN(0x1000);
+    }
+
+    . = 0x82201000;
 
     .text : {
         *(.text .text.*)
+        . = ALIGN(0x1000);
     }
 
     .rodata : {
