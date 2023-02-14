@@ -28,3 +28,7 @@ Temporary Items
 
 # Build directory
 build
+*.o
+*.d
+*.elf
+kernel/report

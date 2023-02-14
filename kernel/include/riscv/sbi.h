@@ -1,12 +1,16 @@
 // sbi.h
 #include <types.h>
+#include <parameters.h>
+#include <stdarg.h>
 
 #ifndef ARCH_RISCV_SBI
 
 #define ARCH_RISCV_SBI
 
+// Flatten Device Tree Address;
 #define SBI_FDT_ADDR 0x82200000
 
+// ECall Error Code Definitions;
 #define SBI_SUCCESS 0
 #define SBI_ERR_FAILURE -1
 #define SBI_ERR_NOT_SUPPORTED -2
@@ -17,12 +21,14 @@
 #define SBI_ERR_ALREADY_STARTED -7
 #define SBI_ERR_ALREADY_STOPPED -8
 
+// ECall Return Struct;
 struct sbiret
 {
     long error;
     long value;
 };
 
+// ECall;
 struct sbiret sbi_ecall(
     int eid,
     int fid,
@@ -33,10 +39,11 @@ struct sbiret sbi_ecall(
     unsigned long arg4,
     unsigned long arg5);
 
+// ECall EID Definitions;
 enum sbi_eid
 {
     SBI_BASE_EXT = 0x10,
-
+#ifdef SBI_LEGACY_SUPPORT
     SBI_LEGACY_EXT_SET_TIMER = 0x00,
     SBI_LEGACY_EXT_PUTCHAR = 0x01,
     SBI_LEGACY_EXT_GETCHAR = 0x02,
@@ -46,7 +53,7 @@ enum sbi_eid
     SBI_LEGACY_EXT_REMOTE_SFENCE_VMA = 0x06,
     SBI_LEGACY_EXT_REMOTE_SFENCE_VMA_W_ASID = 0x07,
     SBI_LEGACY_EXT_SHUTDOWN = 0x08,
-
+#endif
     SBI_TIMER_EXT = 0x54494D45,
     SBI_IPI_EXT = 0x735049,
     SBI_RFENCE_EXT = 0x52464E43,
@@ -57,7 +64,6 @@ enum sbi_eid
 };
 
 // Base Extension (EID #0x10)
-
 enum sbi_base_ext_fid
 {
     SBI_BASE_GET_SPEC_VERSION_FID = 0,
@@ -69,6 +75,7 @@ enum sbi_base_ext_fid
     SBI_BASE_GET_MIMPID_FID = 6
 };
 
+// SBI Implementation ID Definitions;
 enum sbi_impl_id
 {
     SBI_IMPL_ID_BBL = 0,
@@ -79,6 +86,8 @@ enum sbi_impl_id
     SBI_IMPL_ID_DIOSIX = 5,
     SBI_IMPL_ID_COFFER = 6
 };
+
+// SBI Base Extension ECalls;
 
 struct sbiret sbi_get_spec_version(void);
 
@@ -94,13 +103,13 @@ struct sbiret sbi_get_marchid(void);
 
 struct sbiret sbi_get_mimpid(void);
 
-// Legacy Extension
+// Legacy Extension ECalls;
 
 long sbi_legacy_console_putchar(int ch);
 
 long sbi_legacy_console_getchar(void);
 
-// System Reset Extension
+// System Reset Extension FID Definition;
 
 enum sbi_srst_fid
 {

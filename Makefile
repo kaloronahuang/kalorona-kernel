@@ -1,9 +1,11 @@
 
 FILES = \
 	kernel/boot/entry \
-	kernel/entrypoint \
 	kernel/riscv/sbi \
-	kernel/utilities/string
+	kernel/utilities/string \
+	kernel/console/print \
+	kernel/spinlock \
+	kernel/entrypoint
 
 OBJS = $(foreach d, $(FILES), $d.o)
 MAKEFILE_D = $(foreach d, $(FILES), $d.d)

@@ -1,5 +1,6 @@
 // string.h
 #include <types.h>
+#include <parameters.h>
 
 #ifndef UTILITIES_STRING
 
