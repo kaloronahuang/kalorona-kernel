@@ -1,5 +1,5 @@
 // sbi.c
-#include <riscv/sbi.h>
+#include <asm/sbi.h>
 #include <types.h>
 
 // Borrowed from Linux;

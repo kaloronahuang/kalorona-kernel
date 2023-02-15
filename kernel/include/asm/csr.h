@@ -15,7 +15,7 @@
 // Whether all interrupts are enabled in supervisor mode;
 #define SSTATUS_SIE (1LL << 1)
 
-inline uint64 r_sstatus()
+static inline uint64 r_sstatus()
 {
     uint64 x;
     asm volatile("csrr %0, sstatus"
@@ -23,7 +23,7 @@ inline uint64 r_sstatus()
     return x;
 }
 
-inline void w_sstatus(uint64 x)
+static inline void w_sstatus(uint64 x)
 {
     asm volatile("csrw sstatus, %0"
                  :
@@ -33,7 +33,7 @@ inline void w_sstatus(uint64 x)
 // CSR - stvec;
 // Supervisor Trap Vector Base Address Register;
 
-inline uint64 r_stvec()
+static inline uint64 r_stvec()
 {
     uint64 x;
     asm volatile("csrr %0, stvec"
@@ -41,7 +41,7 @@ inline uint64 r_stvec()
     return x;
 }
 
-inline void w_stvec(uint64 x)
+static inline void w_stvec(uint64 x)
 {
     asm volatile("csrw stvec, %0"
                  :
@@ -51,7 +51,7 @@ inline void w_stvec(uint64 x)
 // CSR - sip;
 // Supervisor interrupt-pending register;
 
-inline uint64 r_sip()
+static inline uint64 r_sip()
 {
     uint64 x;
     asm volatile("csrr %0, sip"
@@ -59,7 +59,7 @@ inline uint64 r_sip()
     return x;
 }
 
-inline void w_sip(uint64 x)
+static inline void w_sip(uint64 x)
 {
     asm volatile("csrw sip, %0"
                  :
@@ -69,7 +69,7 @@ inline void w_sip(uint64 x)
 // CSR - sie;
 // Supervisor interrupt-enable register;
 
-inline uint64 r_sie()
+static inline uint64 r_sie()
 {
     uint64 x;
     asm volatile("csrr %0, sie"
@@ -77,7 +77,7 @@ inline uint64 r_sie()
     return x;
 }
 
-inline void w_sie(uint64 x)
+static inline void w_sie(uint64 x)
 {
     asm volatile("csrw sie, %0"
                  :
@@ -87,7 +87,7 @@ inline void w_sie(uint64 x)
 // CSR - scounteren;
 // Counter-Enable Register;
 
-inline uint64 r_scounteren()
+static inline uint64 r_scounteren()
 {
     uint64 x;
     asm volatile("csrr %0, scounteren"
@@ -95,7 +95,7 @@ inline uint64 r_scounteren()
     return x;
 }
 
-inline void w_scounteren(uint64 x)
+static inline void w_scounteren(uint64 x)
 {
     asm volatile("csrw scounteren, %0"
                  :
@@ -105,7 +105,7 @@ inline void w_scounteren(uint64 x)
 // CSR - sscratch;
 // Supervisor Scratch Register;
 
-inline uint64 r_sscratch()
+static inline uint64 r_sscratch()
 {
     uint64 x;
     asm volatile("csrr %0, sscratch"
@@ -113,7 +113,7 @@ inline uint64 r_sscratch()
     return x;
 }
 
-inline void w_sscratch(uint64 x)
+static inline void w_sscratch(uint64 x)
 {
     asm volatile("csrw sscratch, %0"
                  :
@@ -123,7 +123,7 @@ inline void w_sscratch(uint64 x)
 // CSR - sepc;
 // Supervisor Exception Program Counter;
 
-inline uint64 r_sepc()
+static inline uint64 r_sepc()
 {
     uint64 x;
     asm volatile("csrr %0, sepc"
@@ -131,7 +131,7 @@ inline uint64 r_sepc()
     return x;
 }
 
-inline void w_sepc(uint64 x)
+static inline void w_sepc(uint64 x)
 {
     asm volatile("csrw sepc, %0"
                  :
@@ -141,7 +141,7 @@ inline void w_sepc(uint64 x)
 // CSR - scause;
 // Supervisor Cause Register;
 
-inline uint64 r_scause()
+static inline uint64 r_scause()
 {
     uint64 x;
     asm volatile("csrr %0, scause"
@@ -149,7 +149,7 @@ inline uint64 r_scause()
     return x;
 }
 
-inline void w_scause(uint64 x)
+static inline void w_scause(uint64 x)
 {
     asm volatile("csrw scause, %0"
                  :
@@ -159,7 +159,7 @@ inline void w_scause(uint64 x)
 // CSR - stval;
 // Supervisor Trap Value;
 
-inline uint64 r_stval()
+static inline uint64 r_stval()
 {
     uint64 x;
     asm volatile("csrr %0, stval"
@@ -167,7 +167,7 @@ inline uint64 r_stval()
     return x;
 }
 
-inline void w_stval(uint64 x)
+static inline void w_stval(uint64 x)
 {
     asm volatile("csrw stval, %0"
                  :
@@ -177,7 +177,7 @@ inline void w_stval(uint64 x)
 // CSR - senvcfg
 // Supervisor Environment Configuration Register;
 
-inline uint64 r_senvcfg()
+static inline uint64 r_senvcfg()
 {
     uint64 x;
     asm volatile("csrr %0, senvcfg"
@@ -185,7 +185,7 @@ inline uint64 r_senvcfg()
     return x;
 }
 
-inline void w_senvcfg(uint64 x)
+static inline void w_senvcfg(uint64 x)
 {
     asm volatile("csrw senvcfg, %0"
                  :
@@ -195,7 +195,7 @@ inline void w_senvcfg(uint64 x)
 // CSR - sscratch;
 // Supervisor Scratch Register;
 
-inline uint64 r_satp()
+static inline uint64 r_satp()
 {
     uint64 x;
     asm volatile("csrr %0, satp"
@@ -203,7 +203,7 @@ inline uint64 r_satp()
     return x;
 }
 
-inline void w_satp(uint64 x)
+static inline void w_satp(uint64 x)
 {
     asm volatile("csrw satp, %0"
                  :
