@@ -5,6 +5,10 @@
 
 #define CSR
 
+// CSR Header;
+// r_* - Read CSR;
+// read_* - Read information presented in CSR;
+
 // CSR - sstatus;
 // Supervisor Status Register;
 
@@ -28,6 +32,21 @@ static inline void w_sstatus(uint64 x)
     asm volatile("csrw sstatus, %0"
                  :
                  : "r"(x));
+}
+
+static inline int read_interrupt()
+{
+    return (r_sstatus() & SSTATUS_SIE);
+}
+
+static inline void enable_interrupt()
+{
+    w_sstatus(r_sstatus() | SSTATUS_SIE);
+}
+
+static inline void disable_interrupt()
+{
+    w_sstatus(r_sstatus() & (~(SSTATUS_SIE)));
 }
 
 // CSR - stvec;
