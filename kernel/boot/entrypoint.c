@@ -1,15 +1,24 @@
 // entrypoint.c
 #include <types.h>
 #include <parameters.h>
-#include <console.h>
-#include <asm/sbi.h>
-#include <asm/csr.h>
+#include <boot.h>
 #include <asm/registers.h>
+#include <console.h>
+
+void kernel_main();
 
 __attribute__((aligned(16))) char init_stack[4096 * MAX_CPU];
 
-void kernel_entrypoint(uint64 hartid, uint64 fdt_addr)
+ulong boot_hartid;
+int booted = 0;
+
+void kernel_entrypoint(ulong hartid, ptr_t fdt_addr)
 {
+    // Memorize the hartid and fdt_addr;
+    print_str("HART STARTED");
     w_tp(hartid);
-    sbi_srst_system_reset(0, 0);
+    fdt_addr = fdt_addr;
+    if (booted == 0)
+        booted = 1, boot_hartid = hartid;
+    kernel_main();
 }

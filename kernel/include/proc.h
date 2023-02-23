@@ -20,13 +20,13 @@ struct hart
 
 extern struct hart harts[MAX_CPU];
 
-uint current_hart_id();
+uint current_hart_id(void);
 
-struct hart *current_hart();
+struct hart *current_hart(void);
 
-void pushoff_hart();
+void pushoff_hart(void);
 
-void popoff_hart();
+void popoff_hart(void);
 
 struct proc
 {

@@ -16,7 +16,7 @@ SECTIONS
         . = ALIGN(0x1000);
     }
 
-    . = 0x82201000;
+    . = 0x8220f000;
 
     .text : {
         *(.text .text.*)

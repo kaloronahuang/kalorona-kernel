@@ -22,5 +22,6 @@ typedef unsigned int uint;
 typedef unsigned long ulong;
 
 typedef unsigned long size_t;
+typedef unsigned long ptr_t;
 
 #endif

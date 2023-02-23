@@ -2,6 +2,8 @@
 #include <asm/sbi.h>
 #include <types.h>
 
+ptr_t fdt_addr;
+
 // Borrowed from Linux;
 struct sbiret sbi_ecall(
     int eid,
@@ -33,7 +35,34 @@ struct sbiret sbi_ecall(
     return ret;
 }
 
-// System Reset Extension
+// HSM Extension;
+
+struct sbiret sbi_hsm_hart_start(ulong hartid,
+                             ulong start_addr,
+                             ulong opaque)
+{
+    return sbi_ecall(SBI_HSM_EXT, SBI_HSM_HART_START, hartid, start_addr, opaque, 0, 0, 0);
+}
+
+struct sbiret sbi_hsm_hart_stop(void)
+{
+    return sbi_ecall(SBI_HSM_EXT, SBI_HSM_HART_STOP, 0, 0, 0, 0, 0, 0);
+}
+
+struct sbiret sbi_hsm_hart_get_status(ulong hartid)
+{
+    return sbi_ecall(SBI_HSM_EXT, SBI_HSM_HART_GET_STATUS, hartid, 0, 0, 0, 0, 0);
+}
+
+struct sbiret sbi_hsm_hart_suspend(uint32 suspend_type,
+                               ulong resume_addr,
+                               ulong opaque)
+{
+    return sbi_ecall(SBI_HSM_EXT, SBI_HSM_HART_SUSPEND, suspend_type, resume_addr, opaque, 0, 0, 0);
+}
+
+// System Reset Extension;
+
 struct sbiret sbi_srst_system_reset(uint32 reset_type, uint32 reset_reason)
 {
     return sbi_ecall(SBI_SRST_EXT, SBI_SRST_SYSTEM_RESET_FID, reset_type, reset_reason, 0, 0, 0, 0);

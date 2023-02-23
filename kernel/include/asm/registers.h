@@ -5,7 +5,7 @@
 
 #define REGISTERS
 
-static inline uint64 r_tp()
+static uint64 r_tp()
 {
     uint64 x;
     asm volatile("mv %0, tp"
@@ -13,7 +13,7 @@ static inline uint64 r_tp()
     return x;
 }
 
-static inline void w_tp(uint64 x)
+static void w_tp(uint64 x)
 {
     asm volatile("mv tp, %0"
                  :

@@ -1,14 +1,13 @@
 // sbi.h
 #include <types.h>
 #include <parameters.h>
-#include <stdarg.h>
 
 #ifndef ARCH_RISCV_SBI
 
 #define ARCH_RISCV_SBI
 
 // Flatten Device Tree Address;
-#define SBI_FDT_ADDR 0x82200000
+extern ptr_t fdt_addr;
 
 // ECall Error Code Definitions;
 #define SBI_SUCCESS 0
@@ -32,12 +31,12 @@ struct sbiret
 struct sbiret sbi_ecall(
     int eid,
     int fid,
-    unsigned long arg0,
-    unsigned long arg1,
-    unsigned long arg2,
-    unsigned long arg3,
-    unsigned long arg4,
-    unsigned long arg5);
+    ulong arg0,
+    ulong arg1,
+    ulong arg2,
+    ulong arg3,
+    ulong arg4,
+    ulong arg5);
 
 // ECall EID Definitions;
 enum sbi_eid
@@ -63,7 +62,7 @@ enum sbi_eid
     SBI_DBCN_EXT = 0x4442434E
 };
 
-// Base Extension (EID #0x10)
+// Base Extension FID Definition (EID #0x10)
 enum sbi_base_ext_fid
 {
     SBI_BASE_GET_SPEC_VERSION_FID = 0,
@@ -109,16 +108,49 @@ long sbi_legacy_console_putchar(int ch);
 
 long sbi_legacy_console_getchar(void);
 
-// System Reset Extension FID Definition;
+// Hart State Management Extension FID Definition (EID #0x48534D "HSM");
+
+enum sbi_hsm_hart_stat
+{
+    SBI_HSM_HART_STAT_STARTED = 0,
+    SBI_HSM_HART_STAT_STOPPED = 1,
+    SBI_HSM_HART_STAT_START_PENDING = 2,
+    SBI_HSM_HART_STAT_STOP_PENDING = 3,
+    SBI_HSM_HART_STAT_SUSPENDED = 4,
+    SBI_HSM_HART_STAT_SUSPEND_PENDING = 5,
+    SBI_HSM_HART_STAT_RESUME_PENDING = 6,
+};
+
+enum sbi_hsm_fid
+{
+    SBI_HSM_HART_START = 0,
+    SBI_HSM_HART_STOP = 1,
+    SBI_HSM_HART_GET_STATUS = 2,
+    SBI_HSM_HART_SUSPEND = 3
+};
+
+struct sbiret sbi_hsm_hart_start(ulong hartid,
+                             ulong start_addr,
+                             ulong opaque);
+
+struct sbiret sbi_hsm_hart_stop(void);
+
+struct sbiret sbi_hsm_hart_get_status(ulong hartid);
+
+struct sbiret sbi_hsm_hart_suspend(uint32 suspend_type,
+                               ulong resume_addr,
+                               ulong opaque);
+
+// System Reset Extension FID Definition (EID #0x53525354 "SRST");
 
 enum sbi_srst_fid
 {
-    SBI_SRST_SYSTEM_RESET_FID= 0
+    SBI_SRST_SYSTEM_RESET_FID = 0
 };
 
 struct sbiret sbi_srst_system_reset(uint32 reset_type, uint32 reset_reason);
 
-// Debug Console Extension
+// Debug Console Extension FID Definition (EID #0x4442434E "DBCN");
 // Not Supported Yet!
 
 enum sbi_dbcn_fid
