@@ -10,5 +10,6 @@ extern int booted;
 
 extern void __entry();
 void kernel_entrypoint(ulong hartid, ptr_t fdt_addr);
+void kernel_main();
 
 #endif

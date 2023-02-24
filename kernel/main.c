@@ -10,14 +10,11 @@ void kernel_main()
 {
     if (booted && boot_hartid == r_tp())
     {
+        // init;
         init_console();
         // eventually, start all other harts;
         for (ulong hid = 0; hid < MAX_CPU; hid++)
             if (hid != boot_hartid)
-            {
-                struct sbiret ret = sbi_hsm_hart_start(hid, (ulong)(&__entry), fdt_addr);
-                print_int64(ret.error);
-                print_str(" HART\n");
-            }
+                sbi_hsm_hart_start(hid, (ulong)(&__entry), FDT_ADDR);
     }
 }

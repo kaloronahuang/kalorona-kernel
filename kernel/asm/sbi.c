@@ -2,7 +2,7 @@
 #include <asm/sbi.h>
 #include <types.h>
 
-ptr_t fdt_addr;
+ptr_t FDT_ADDR;
 
 // Borrowed from Linux;
 struct sbiret sbi_ecall(

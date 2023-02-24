@@ -21,6 +21,7 @@ void pushoff_hart()
 {
     int prev_mode = read_interrupt();
 
+    disable_interrupt();
     struct hart* chart = current_hart();
     if (chart->trap_pushoff_dep == 0)
         chart->trap_enabled = prev_mode;
