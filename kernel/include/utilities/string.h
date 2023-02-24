@@ -8,4 +8,6 @@
 
 size_t strlen(const char *s);
 
+void memset(void *dst, char val, size_t siz);
+
 #endif

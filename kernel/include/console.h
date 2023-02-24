@@ -14,7 +14,7 @@ struct console_lock_struct
 
 extern struct console_lock_struct console_lock;
 
-void init_console();
+void console_init();
 
 void print_char(char c);
 

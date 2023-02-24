@@ -2,8 +2,10 @@
 #include <proc.h>
 #include <types.h>
 #include <asm/registers.h>
-#include <asm/csr.h>
+#include <asm/scsr.h>
 #include <signal.h>
+
+size_t hart_count;
 
 struct hart harts[MAX_CPU];
 

@@ -28,6 +28,7 @@ SECTIONS
         *(.srodata .srodata.*)
         . = ALIGN(16);
         *(.rodata .rodata.*)
+        PROVIDE(KERNEL_TEXT_END = .);
     }
 
     .data : {
@@ -43,4 +44,6 @@ SECTIONS
         . = ALIGN(16);
         *(.bss .bss.*)
     }
+
+    PROVIDE(KERNEL_END = .);
 }

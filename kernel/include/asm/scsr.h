@@ -1,9 +1,9 @@
-// csr.h
+// scsr.h
 #include <types.h>
 
-#ifndef CSR
+#ifndef SCSR
 
-#define CSR
+#define SCSR
 
 // CSR Header;
 // r_* - Read CSR;
@@ -213,6 +213,12 @@ static inline void w_senvcfg(uint64 x)
 
 // CSR - sscratch;
 // Supervisor Scratch Register;
+
+#define SATP_MODE_NONE 0
+#define SATP_MODE_SV39 8
+#define SATP_MODE_SV48 9
+#define SATP_MODE_SV57 10
+#define SATP_MODE_SV64 11
 
 static inline uint64 r_satp()
 {

@@ -18,6 +18,8 @@ struct hart
     int trap_enabled;
 };
 
+extern size_t hart_count;
+
 extern struct hart harts[MAX_CPU];
 
 uint current_hart_id(void);

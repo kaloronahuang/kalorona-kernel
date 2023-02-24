@@ -8,7 +8,7 @@ static const char *digits = "0123456789abcddef";
 
 struct console_lock_struct console_lock;
 
-void init_console()
+void console_init()
 {
     init_spinlock(&(console_lock.lock), "console_lock");
     console_lock.locking_enabled = 1;

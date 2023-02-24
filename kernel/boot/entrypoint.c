@@ -17,7 +17,6 @@ void kernel_entrypoint(ulong hartid, ptr_t fdt_addr)
     w_tp(hartid);
     FDT_ADDR = fdt_addr;
     
-    print_str("HART STARTED");
     if (booted == 0)
         booted = 1, boot_hartid = hartid;
     kernel_main();
