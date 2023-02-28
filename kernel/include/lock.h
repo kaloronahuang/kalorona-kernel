@@ -12,11 +12,11 @@ struct spinlock
     struct hart *hart;
 };
 
-void init_spinlock(struct spinlock *lk, char *description);
+void spinlock_init(struct spinlock *lk, char *description);
 
-void acquire_spinlock(struct spinlock *lk);
+void spinlock_acquire(struct spinlock *lk);
 
-void release_spinlock(struct spinlock *lk);
+void spinlock_release(struct spinlock *lk);
 
 int is_holding_spinlock(struct spinlock *lk);
 

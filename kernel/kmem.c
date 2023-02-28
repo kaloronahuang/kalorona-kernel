@@ -16,7 +16,7 @@ char *kmem_head;
 
 void kmem_init(void)
 {
-    init_spinlock(&kmem.lock, "kernel_mem_lock");
+    spinlock_init(&kmem.lock, "kernel_mem_lock");
     kmem_head = (char *)(PAGE_ROUND_UP((uint64)(KERNEL_END)));
     for (char *ptr = kmem_head; ptr < kmem_head + KMEM_SIZE; ptr += PAGE_SIZE)
         kmem_free(ptr);
@@ -26,11 +26,11 @@ void *kmem_alloc(void)
 {
     struct kmem_freepage *ptr;
 
-    acquire_spinlock(&kmem.lock);
+    spinlock_acquire(&kmem.lock);
     ptr = kmem.freepage_head;
     if (ptr)
         kmem.freepage_head = ptr->nxt;
-    release_spinlock(&kmem.lock);
+    spinlock_release(&kmem.lock);
 
     if (ptr)
         memset(ptr, 0, PAGE_SIZE);
@@ -48,8 +48,8 @@ void kmem_free(void *phy_addr)
 
     ptr = (struct kmem_freepage *)phy_addr;
 
-    acquire_spinlock(&kmem.lock);
+    spinlock_acquire(&kmem.lock);
     ptr->nxt = kmem.freepage_head;
     kmem.freepage_head = ptr;
-    release_spinlock(&kmem.lock);
+    spinlock_release(&kmem.lock);
 }

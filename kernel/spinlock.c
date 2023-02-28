@@ -4,19 +4,19 @@
 #include <proc.h>
 #include <signal.h>
 
-void init_spinlock(struct spinlock *lk, char *description)
+void spinlock_init(struct spinlock *lk, char *description)
 {
     lk->description = description;
     lk->locked = 0;
     lk->hart = NULL;
 }
 
-void acquire_spinlock(struct spinlock *lk)
+void spinlock_acquire(struct spinlock *lk)
 {
     pushoff_hart();
 
     if (is_holding_spinlock(lk))
-        panic("acquire_spinlock - spinlock held;");
+        panic("spinlock_acquire - spinlock held;");
 
     while (__sync_lock_test_and_set(&lk->locked, 1) != 0)
         ;
@@ -25,10 +25,10 @@ void acquire_spinlock(struct spinlock *lk)
     lk->hart = current_hart();
 }
 
-void release_spinlock(struct spinlock *lk)
+void spinlock_release(struct spinlock *lk)
 {
     if (!is_holding_spinlock(lk))
-        panic("release_spinlock - spinlock not held;");
+        panic("spinlock_release - spinlock not held;");
     lk->hart = 0;
     
     __sync_synchronize();

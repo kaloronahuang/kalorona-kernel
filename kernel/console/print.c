@@ -10,7 +10,7 @@ struct console_lock_struct console_lock;
 
 void console_init()
 {
-    init_spinlock(&(console_lock.lock), "console_lock");
+    spinlock_init(&(console_lock.lock), "console_lock");
     console_lock.locking_enabled = 1;
 }
 
@@ -24,13 +24,13 @@ void print_char(char c)
 int print_str(char *s)
 {
     if (console_lock.locking_enabled)
-        acquire_spinlock(&(console_lock.lock));
+        spinlock_acquire(&(console_lock.lock));
     if (s == NULL)
         return -1;
     while (*(s) != '\0')
         print_char(*(s++));
     if (console_lock.locking_enabled)
-        release_spinlock(&(console_lock.lock));
+        spinlock_release(&(console_lock.lock));
     return 0;
 }
 
