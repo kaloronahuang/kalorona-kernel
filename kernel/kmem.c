@@ -41,7 +41,7 @@ void kmem_free(void *phy_addr)
 {
     struct kmem_freepage *ptr;
 
-    if (((char *)(phy_addr) >= (kmem_head + KMEM_SIZE)) || ((char *)(phy_addr) < kmem_head) || ((((uint64)phy_addr) & (~(PAGE_SIZE - 1))) != 0))
+    if (((char *)(phy_addr) >= (kmem_head + KMEM_SIZE)) || ((char *)(phy_addr) < kmem_head) || ((((uint64)phy_addr) & (PAGE_SIZE - 1)) != 0))
         panic("kmem_free");
 
     memset(phy_addr, 0, PAGE_SIZE);

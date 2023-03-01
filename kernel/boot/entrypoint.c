@@ -5,7 +5,7 @@
 #include <asm/registers.h>
 #include <asm/sbi.h>
 #include <console.h>
-#include <utilities/device_tree.h>
+#include <device/fdt.h>
 
 __attribute__((aligned(16))) char init_stack[4096 * MAX_CPU];
 

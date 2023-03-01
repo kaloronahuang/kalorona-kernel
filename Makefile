@@ -4,11 +4,13 @@ FILES = \
 	kernel/boot/entrypoint \
 	kernel/asm/sbi \
 	kernel/utilities/string \
+	kernel/utilities/bytes \
 	kernel/console/print \
 	kernel/proc/hart \
 	kernel/spinlock \
 	kernel/signal \
 	kernel/kmem \
+	kernel/vmem \
 	kernel/main
 
 OBJS = $(foreach d, $(FILES), $d.o)
@@ -53,7 +55,7 @@ clean:
 
 QEMU = qemu-system-riscv64
 GDB_PORT = 25501
-QEMU_FLAGS = -machine virt -m 1024M -nographic -bios $(SBI_BUILD) -smp 4
+QEMU_FLAGS = -machine virt -m 1024M -nographic -bios $(SBI_BUILD) -smp 1
 QEMU_KERNEL_FLAG = -kernel kernel/kernel.elf
 QEMU_DEBUG_FLAGS = -gdb tcp::$(GDB_PORT) -S
 

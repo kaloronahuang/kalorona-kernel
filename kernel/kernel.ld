@@ -19,8 +19,10 @@ SECTIONS
     . = 0x8220f000;
 
     .text : {
+        PROVIDE(KERNEL_TEXT_BEGIN = .);
         *(.text .text.*)
         . = ALIGN(0x1000);
+        PROVIDE(KERNEL_TEXT_END = .);
     }
 
     .rodata : {
@@ -28,7 +30,6 @@ SECTIONS
         *(.srodata .srodata.*)
         . = ALIGN(16);
         *(.rodata .rodata.*)
-        PROVIDE(KERNEL_TEXT_END = .);
     }
 
     .data : {

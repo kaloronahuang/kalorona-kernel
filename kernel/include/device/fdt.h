@@ -1,9 +1,9 @@
-// device_tree.h
+// fdt.h
 #include <types.h>
 
-#ifndef UTILITIES_DEVICE_TREE
+#ifndef DEVICE_FDT
 
-#define UTILITIES_DEVICE_TREE
+#define DEVICE_FDT
 
 struct fdt_header
 {

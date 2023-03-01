@@ -6,9 +6,6 @@
 
 #define ARCH_RISCV_SBI
 
-// Flatten Device Tree Address;
-extern ptr_t FDT_ADDR;
-
 // ECall Error Code Definitions;
 #define SBI_SUCCESS 0
 #define SBI_ERR_FAILURE -1
