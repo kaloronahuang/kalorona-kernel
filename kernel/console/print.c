@@ -14,223 +14,101 @@ void console_init()
     console_lock.locking_enabled = 1;
 }
 
-void print_char(char c)
+static void print_char(char c)
 {
     // TODO: Waiting for UART support;
     // Using SBI ecall for temporary use;
     sbi_legacy_console_putchar(c);
 }
 
-int print_str(char *s)
+static void print_uint(uint64 x, uint64 base)
+{
+    if (x == 0)
+        print_char('0');
+    else
+    {
+        char buf[64];
+        int ptr = 0;
+        while (x)
+            buf[ptr++] = digits[x % base], x /= base;
+        while (ptr--)
+            print_char(buf[ptr]);
+    }
+}
+
+static void print_int(int64 x, uint64 base)
+{
+    if (x < 0)
+        putchar('-'), x = -x;
+    print_uint(x, base);
+}
+
+void putchar(const char c)
 {
     if (console_lock.locking_enabled)
         spinlock_acquire(&(console_lock.lock));
-    if (s == NULL)
+    print_char(c);
+    if (console_lock.locking_enabled)
+        spinlock_release(&(console_lock.lock));
+}
+
+int printf(const char *fmt, ...)
+{
+    if (fmt == NULL)
         return -1;
-    while (*(s) != '\0')
-        print_char(*(s++));
+    if (console_lock.locking_enabled)
+        spinlock_acquire(&(console_lock.lock));
+
+    char *param_ptr = (&fmt) + sizeof(fmt);
+    for (int i = 0; fmt[i]; i++)
+    {
+        if (fmt[i] != '%')
+        {
+            print_char(fmt[i]);
+            continue;
+        }
+        char c = fmt[++i];
+        if (c == '\0')
+        {
+            print_char('%');
+            break;
+        }
+        switch (c)
+        {
+        case 'd':
+            print_int(*((int32 *)param_ptr), 10);
+            param_ptr += sizeof(int32);
+            break;
+        case 'x':
+            print_int(*((int32 *)param_ptr), 16);
+            param_ptr += sizeof(int32);
+            break;
+        case 'p':
+            print_char('0'), print_char('x');
+            print_uint(*((uint64 *)param_ptr), 16);
+            param_ptr += sizeof(uint64);
+            break;
+        case 'u':
+            print_uint(*((uint32 *)param_ptr), 10);
+            param_ptr += sizeof(uint32);
+            break;
+        case 's':
+            char *s = *((char **)param_ptr);
+            if (s == NULL)
+                s = "(null)";
+            for (; *s; s++)
+                print_char(*s);
+            break;
+        case '%':
+            print_char('%');
+            break;
+        default:
+            print_char('%'), print_char(c);
+            break;
+        }
+    }
+
     if (console_lock.locking_enabled)
         spinlock_release(&(console_lock.lock));
     return 0;
 }
-
-void print_uint16_by_base(uint16 x, uint16 base)
-{
-    if (x == 0)
-    {
-        print_str("0");
-        return;
-    }
-    char buf[17];
-    buf[0] = '0', buf[1] = '\0';
-    size_t cur = 0;
-    uint16 tmp = x;
-    while (tmp != 0)
-    {
-        buf[cur++] = digits[tmp % base];
-        tmp /= base;
-    }
-    size_t lptr = 0, rptr = cur - 1;
-    while (lptr < rptr)
-    {
-        char ex_tmp = buf[lptr];
-        buf[lptr] = buf[rptr];
-        buf[rptr] = ex_tmp;
-        lptr++, rptr--;
-    }
-    buf[cur] = '\0';
-    print_str(buf);
-}
-
-void print_uint16(uint16 x) { print_uint16_by_base(x, 10); }
-
-void print_uint32_by_base(uint32 x, uint32 base)
-{
-    if (x == 0)
-    {
-        print_str("0");
-        return;
-    }
-    char buf[33];
-    buf[0] = '0', buf[1] = '\0';
-    size_t cur = 0;
-    uint32 tmp = x;
-    while (tmp != 0)
-    {
-        buf[cur++] = digits[tmp % base];
-        tmp /= base;
-    }
-    size_t lptr = 0, rptr = cur - 1;
-    while (lptr < rptr)
-    {
-        char ex_tmp = buf[lptr];
-        buf[lptr] = buf[rptr];
-        buf[rptr] = ex_tmp;
-        lptr++, rptr--;
-    }
-    buf[cur] = '\0';
-    print_str(buf);
-}
-
-void print_uint32(uint32 x) { print_uint32_by_base(x, 10); }
-
-void print_uint64_by_base(uint64 x, uint64 base)
-{
-    if (x == 0)
-    {
-        print_str("0");
-        return;
-    }
-    char buf[65];
-    buf[0] = '0', buf[1] = '\0';
-    size_t cur = 0;
-    uint64 tmp = x;
-    while (tmp != 0)
-    {
-        buf[cur++] = digits[tmp % base];
-        tmp /= base;
-    }
-    size_t lptr = 0, rptr = cur - 1;
-    while (lptr < rptr)
-    {
-        char ex_tmp = buf[lptr];
-        buf[lptr] = buf[rptr];
-        buf[rptr] = ex_tmp;
-        lptr++, rptr--;
-    }
-    buf[cur] = '\0';
-    print_str(buf);
-}
-
-void print_uint64(uint64 x) { print_uint64_by_base(x, 10); }
-
-void print_int16_by_base(int16 x, int16 base)
-{
-    if (x == 0)
-    {
-        print_str("0");
-        return;
-    }
-    char _buf[18];
-    _buf[0] = '-';
-    char *buf = &(_buf[1]);
-    buf[0] = '0', buf[1] = '\0';
-    size_t cur = 0;
-    int16 tmp = x;
-    if (tmp < 0)
-        tmp = -tmp;
-    while (tmp != 0)
-    {
-        buf[cur++] = digits[tmp % base];
-        tmp /= base;
-    }
-    size_t lptr = 0, rptr = cur - 1;
-    while (lptr < rptr)
-    {
-        char ex_tmp = buf[lptr];
-        buf[lptr] = buf[rptr];
-        buf[rptr] = ex_tmp;
-        lptr++, rptr--;
-    }
-    buf[cur] = '\0';
-    if (x < 0)
-        print_str(_buf);
-    else
-        print_str(buf);
-}
-
-void print_int16(int16 x) { print_int16_by_base(x, 10); }
-
-void print_int32_by_base(int32 x, int32 base)
-{
-    if (x == 0)
-    {
-        print_str("0");
-        return;
-    }
-    char _buf[34];
-    _buf[0] = '-';
-    char *buf = &(_buf[1]);
-    buf[0] = '0', buf[1] = '\0';
-    size_t cur = 0;
-    int32 tmp = x;
-    if (tmp < 0)
-        tmp = -tmp;
-    while (tmp != 0)
-    {
-        buf[cur++] = digits[tmp % base];
-        tmp /= base;
-    }
-    size_t lptr = 0, rptr = cur - 1;
-    while (lptr < rptr)
-    {
-        char ex_tmp = buf[lptr];
-        buf[lptr] = buf[rptr];
-        buf[rptr] = ex_tmp;
-        lptr++, rptr--;
-    }
-    buf[cur] = '\0';
-    if (x < 0)
-        print_str(_buf);
-    else
-        print_str(buf);
-}
-
-void print_int32(int32 x) { print_int32_by_base(x, 10); }
-
-void print_int64_by_base(int64 x, int64 base)
-{
-    if (x == 0)
-    {
-        print_str("0");
-        return;
-    }
-    char _buf[66];
-    _buf[0] = '-';
-    char *buf = &(_buf[1]);
-    buf[0] = '0', buf[1] = '\0';
-    size_t cur = 0;
-    int64 tmp = x;
-    if (tmp < 0)
-        tmp = -tmp;
-    while (tmp != 0)
-    {
-        buf[cur++] = digits[tmp % base];
-        tmp /= base;
-    }
-    size_t lptr = 0, rptr = cur - 1;
-    while (lptr < rptr)
-    {
-        char ex_tmp = buf[lptr];
-        buf[lptr] = buf[rptr];
-        buf[rptr] = ex_tmp;
-        lptr++, rptr--;
-    }
-    buf[cur] = '\0';
-    if (x < 0)
-        print_str(_buf);
-    else
-        print_str(buf);
-}
-
-void print_int64(int64 x) { print_int64_by_base(x, 10); }
