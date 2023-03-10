@@ -25,4 +25,4 @@ void kmem_free(void *phy_addr);
 #define PAGE_ROUND_UP(x) (((x) + PAGE_SIZE - 1) & (~(PAGE_SIZE - 1)))
 #define PAGE_ROUND_DOWN(x) ((x) & (~(PAGE_SIZE - 1)))
 
-#endif KMEM
+#endif

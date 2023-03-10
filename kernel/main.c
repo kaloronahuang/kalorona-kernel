@@ -8,7 +8,6 @@
 #include <kmem.h>
 #include <proc.h>
 #include <vmem.h>
-#include <device/fdt.h>
 #include <utilities/bytes.h>
 
 void vm_test();
@@ -26,9 +25,9 @@ void kernel_main()
         printf("Current hartid: %u\n\n", (uint32)boot_hartid);
 
         // Device Tree;
-        printf("Device Tree\n");
-        printf("- fdt: (hex address) %p\n", fdt);
-        printf("- size: (dec size) %u\n\n", flip_bytes_32(fdt->totalsize));
+        // printf("Device Tree\n");
+        // printf("- fdt: (hex address) %p\n", fdt);
+        // printf("- size: (dec size) %u\n\n", flip_bytes_32(fdt->totalsize));
 
         // Kernel Memory;
         kmem_init();
@@ -47,7 +46,7 @@ void kernel_main()
         for (ulong hid = 0; hid < MAX_CPU; hid++)
             if (hid != boot_hartid)
             {
-                struct sbiret res = sbi_hsm_hart_start(hid, (ulong)(&__entry), (ulong)(fdt));
+                struct sbiret res = sbi_hsm_hart_start(hid, (ulong)(&__entry), NULL /* (ulong)(fdt) */);
                 if (res.error == 0)
                     hart_count++;
             }

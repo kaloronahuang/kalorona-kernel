@@ -1,23 +1,19 @@
 
-FILES = \
-	boot/entry \
-	boot/entrypoint \
-	asm/sbi \
-	utilities/string \
-	utilities/bytes \
-	console/print \
-	proc/hart \
-	spinlock \
-	signal \
-	kmem \
-	vmem \
-	main
-
-OBJS = $(foreach d, $(FILES), $d.o)
-MAKEFILE_D = $(foreach d, $(FILES), $d.d)
+OBJS = \
+	boot/entry.o \
+	boot/entrypoint.o \
+	asm/sbi.o \
+	utilities/string.o \
+	utilities/bytes.o \
+	console/print.o \
+	proc/hart.o \
+	spinlock.o \
+	signal.o \
+	kmem.o \
+	vmem.o \
+	main.o
 
 INCLUDE_DIR = include/
-INCLUDE_PARAMS = $(foreach d, $(INCLUDE_DIR), -I$d)
 
 CC = $(CROSS_COMPILE)gcc
 AS = $(CROSS_COMPILE)gas
@@ -29,9 +25,20 @@ CFLAGS = -Wall -O0 -fno-omit-frame-pointer -ggdb -gdwarf-2
 CFLAGS += -MD
 CFLAGS += -ffreestanding -fno-common -nostdlib
 CFLAGS += -I. -mno-relax -fno-pie -no-pie -mcmodel=medany
-CFLAGS += $(INCLUDE_PARAMS)
 
 LD_FLAGS = -z max-page-size=4096
+
+# Dependency: libfdt;
+LIBFDT_DIR = device/libfdt
+include $(LIBFDT_DIR)/Makefile.libfdt
+INCLUDE_DIR += $(LIBFDT_DIR)
+OBJS += $(addprefix $(LIBFDT_DIR)/, $(LIBFDT_OBJS))
+
+# Sum up;
+
+D_FILES = $(OBJS:%.o=%.d)
+INCLUDE_PARAMS = $(foreach d, $(INCLUDE_DIR), -I$d)
+CFLAGS += $(INCLUDE_PARAMS)
 
 kernel.elf: $(OBJS) kernel.ld
 	$(LD) $(LD_FLAGS) -T kernel.ld -o kernel.elf $(OBJS)
@@ -45,7 +52,7 @@ clean:
 	kernel.elf \
 	report \
 	$(OBJS) \
-	$(MAKEFILE_D)
+	$(D_FILES)
 
 QEMU = qemu-system-riscv64
 GDB_PORT = 25501
