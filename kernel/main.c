@@ -9,10 +9,7 @@
 #include <proc.h>
 #include <vmem.h>
 #include <utilities/bytes.h>
-
-void vm_test();
-
-void vm_test_piror();
+#include <device.h>
 
 void kernel_main()
 {
@@ -20,14 +17,12 @@ void kernel_main()
     {
         // Console;
         console_init();
-        printf("Kalorona Kernel\n");
-        printf("Console initialized.\n");
-        printf("Current hartid: %u\n\n", (uint32)boot_hartid);
+        printf("[kernel_main]kalorona kernel\n");
+        printf("[kernel_main]current hartid: %u\n", (uint32)boot_hartid);
 
         // Device Tree;
-        // printf("Device Tree\n");
-        // printf("- fdt: (hex address) %p\n", fdt);
-        // printf("- size: (dec size) %u\n\n", flip_bytes_32(fdt->totalsize));
+        printf("[kernel_main]start initializing devices...\n\n");
+        device_init();
 
         // Kernel Memory;
         kmem_init();

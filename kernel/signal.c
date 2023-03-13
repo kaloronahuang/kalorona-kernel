@@ -4,7 +4,7 @@
 
 void panic(const char *s)
 {
-    printf(s);
+    printf("[panic]%s\n", s);
     for (;;)
     {
     }

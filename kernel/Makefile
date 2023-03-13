@@ -6,6 +6,8 @@ OBJS = \
 	utilities/string.o \
 	utilities/bytes.o \
 	console/print.o \
+	device/memory.o \
+	device.o \
 	proc/hart.o \
 	spinlock.o \
 	signal.o \
@@ -40,11 +42,22 @@ D_FILES = $(OBJS:%.o=%.d)
 INCLUDE_PARAMS = $(foreach d, $(INCLUDE_DIR), -I$d)
 CFLAGS += $(INCLUDE_PARAMS)
 
+UNAME_S = $(shell uname -s)
+READELF =
+ifeq ($(UNAME_S),Linux)
+	READELF = readelf
+endif
+ifeq ($(UNAME_S),Darwin)
+	READELF = /usr/local/opt/binutils/bin/greadelf 
+endif
+
 kernel.elf: $(OBJS) kernel.ld
 	$(LD) $(LD_FLAGS) -T kernel.ld -o kernel.elf $(OBJS)
-	readelf -a kernel.elf > report
 
 kernel: kernel.elf
+
+kernel-image-report: kernel.elf
+	$(READELF) -a kernel.elf > report
 
 clean:
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
@@ -63,10 +76,10 @@ QEMU_DEBUG_FLAGS = -gdb tcp::$(GDB_PORT) -S
 qemu: kernel.elf
 	$(QEMU) $(QEMU_FLAGS) $(QEMU_KERNEL_FLAG)
 
-qemu_dump_dtb:
+qemu-dump-dtb:
 	$(QEMU) $(QEMU_FLAGS) -machine dumpdtb=qemu.dtb
-	dtc -o dump.dts -O dts -I dtb qemu.dtb
+	dtc -o qemu.dts -O dts -I dtb qemu.dtb
 
-qemu_debug: kernel.elf
+qemu-debug: kernel.elf
 	echo "Now QEMU started with debugging port binded at $(GDB_PORT)"
 	$(QEMU) $(QEMU_FLAGS) $(QEMU_KERNEL_FLAG) $(QEMU_DEBUG_FLAGS)

@@ -12,6 +12,7 @@ void console_init()
 {
     spinlock_init(&(console_lock.lock), "console_lock");
     console_lock.locking_enabled = 1;
+    printf("[console]Console initialized.\n");
 }
 
 static void print_char(char c)

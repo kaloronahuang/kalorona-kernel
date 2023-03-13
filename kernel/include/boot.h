@@ -1,5 +1,6 @@
 // boot.h
 #include <types.h>
+#include <device.h>
 
 #ifndef BOOT
 
@@ -9,7 +10,7 @@ extern ulong boot_hartid;
 extern int booted;
 
 extern void __entry();
-void kernel_entrypoint(ulong hartid, ptr_t fdt_addr);
+void kernel_entrypoint(ulong hartid, struct fdt_header *fdt_addr);
 void kernel_main();
 
 #endif
