@@ -16,8 +16,6 @@ SECTIONS
         . = ALIGN(0x1000);
     }
 
-    . = 0x8220f000;
-
     .text : {
         PROVIDE(KERNEL_TEXT_BEGIN = .);
         *(.text .text.*)

@@ -25,13 +25,13 @@ typedef uint64 *pagetable_t;
 
 #define SATP(mode, pgtbl) (((mode) << 60) | (((uint64)pgtbl) >> PAGE_OFFSET_SHIFT))
 
-#ifdef VMEM_MODE 8L
+#if VMEM_MODE == 8L
 #define VA_LEN 39
-#elif VMEM_MODE 9L
+#elif VMEM_MODE == 9L
 #define VA_LEN 48
-#elif VMEM_MODE 10L
+#elif VMEM_MODE == 10L
 #define VA_LEN 57
-#elif VMEM_MODE 11L
+#elif VMEM_MODE == 11L
 #define VA_LEN 64
 #endif
 

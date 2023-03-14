@@ -51,35 +51,52 @@ ifeq ($(UNAME_S),Darwin)
 	READELF = /usr/local/opt/binutils/bin/greadelf 
 endif
 
-kernel.elf: $(OBJS) kernel.ld
-	$(LD) $(LD_FLAGS) -T kernel.ld -o kernel.elf $(OBJS)
+build/kernel.elf: $(OBJS) kernel.ld
+	mkdir build/
+	$(LD) $(LD_FLAGS) -T kernel.ld -o build/kernel.elf $(OBJS)
 
-kernel: kernel.elf
+build/fs.img: build/kernel.elf
+	sudo sh scripts/mkfs.sh
 
-kernel-image-report: kernel.elf
-	$(READELF) -a kernel.elf > report
+kernel: build/fs.img
+
+kernel-image-report: build/kernel.elf
+	$(READELF) -a build/kernel.elf > build/report
 
 clean:
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
 	*/*.d */*.asm */*.sym \
-	kernel.elf \
-	report \
 	$(OBJS) \
 	$(D_FILES)
+	rm -rf build/
 
 QEMU = qemu-system-riscv64
+QEMU_MACHINE_FLAGS = -machine virt -m 1024M -nographic -smp 1
+
+UBOOT_FLAGS = -bios $(UBOOT_DIR)/spl/u-boot-spl.bin -device loader,file=$(UBOOT_DIR)/u-boot.itb,addr=0x80200000
+KERNEL_FS_FLAGS = -drive if=none,file=$(PWD)/build/fs.img,format=raw,id=x0 \
+	-device virtio-blk-device,drive=x0
+
+OPENSBI_FLAGS = -bios $(SBI_BUILD)
+KERNEL_IMG_FLAGS = -kernel build/kernel.elf
+
 GDB_PORT = 25501
-QEMU_FLAGS = -machine virt -m 1024M -nographic -bios $(SBI_BUILD) -smp 1
-QEMU_KERNEL_FLAG = -kernel kernel.elf
 QEMU_DEBUG_FLAGS = -gdb tcp::$(GDB_PORT) -S
 
-qemu: kernel.elf
-	$(QEMU) $(QEMU_FLAGS) $(QEMU_KERNEL_FLAG)
+qemu-sbi: build/kernel.elf
+	$(QEMU) $(QEMU_MACHINE_FLAGS) $(OPENSBI_FLAGS) $(KERNEL_IMG_FLAGS)
+
+qemu-uboot: build/fs.img
+	$(QEMU) $(QEMU_MACHINE_FLAGS) $(UBOOT_FLAGS) $(KERNEL_FS_FLAGS)
 
 qemu-dump-dtb:
-	$(QEMU) $(QEMU_FLAGS) -machine dumpdtb=qemu.dtb
+	$(QEMU) $(QEMU_MACHINE_FLAGS) $(OPENSBI_FLAGS) $(KERNEL_IMG_FLAGS) -machine dumpdtb=qemu.dtb
 	dtc -o qemu.dts -O dts -I dtb qemu.dtb
 
-qemu-debug: kernel.elf
+qemu-debug-sbi: build/kernel.elf
 	echo "Now QEMU started with debugging port binded at $(GDB_PORT)"
-	$(QEMU) $(QEMU_FLAGS) $(QEMU_KERNEL_FLAG) $(QEMU_DEBUG_FLAGS)
+	$(QEMU) $(QEMU_MACHINE_FLAGS) $(OPENSBI_FLAGS) $(KERNEL_IMG_FLAGS) $(QEMU_DEBUG_FLAGS)
+
+qemu-debug-uboot: build/fs.img
+	echo "Now QEMU started with debugging port binded at $(GDB_PORT)"
+	$(QEMU) $(QEMU_MACHINE_FLAGS) $(UBOOT_FLAGS) $(KERNEL_FS_FLAGS) $(QEMU_DEBUG_FLAGS)

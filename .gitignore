@@ -32,4 +32,4 @@ build
 *.o
 *.d
 *.elf
-kernel/report
+kernel/build
