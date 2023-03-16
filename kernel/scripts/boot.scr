@@ -1,3 +1,3 @@
 setenv autostart 1
-load virtio 1:1 0xa0000000 /boot/kernel.elf
-bootelf -p 0xa0000000 0x$fdtcontroladdr 
+load virtio 0:1 0xa0000000 /boot/kernel.elf
+bootelf -p 0xa0000000 0x$fdtcontroladdr

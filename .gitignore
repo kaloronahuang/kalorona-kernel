@@ -32,4 +32,5 @@ build
 *.o
 *.d
 *.elf
+*.ld
 kernel/build

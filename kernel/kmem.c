@@ -1,4 +1,5 @@
 // kmem.c
+/*
 #include <kmem.h>
 #include <lock.h>
 #include <signal.h>
@@ -53,3 +54,4 @@ void kmem_free(void *phy_addr)
     kmem.freepage_head = ptr;
     spinlock_release(&kmem.lock);
 }
+*/

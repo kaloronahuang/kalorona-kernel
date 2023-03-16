@@ -2,6 +2,7 @@
 #include <types.h>
 #include <kmem.h>
 #include <parameters.h>
+#include <vmem_defs.h>
 
 #ifndef VMEM
 
@@ -24,16 +25,6 @@ typedef uint64 *pagetable_t;
 #define PTE_PA(pte) ((((uint64)(pte)) >> 10) << PAGE_OFFSET_SHIFT)
 
 #define SATP(mode, pgtbl) (((mode) << 60) | (((uint64)pgtbl) >> PAGE_OFFSET_SHIFT))
-
-#if VMEM_MODE == 8L
-#define VA_LEN 39
-#elif VMEM_MODE == 9L
-#define VA_LEN 48
-#elif VMEM_MODE == 10L
-#define VA_LEN 57
-#elif VMEM_MODE == 11L
-#define VA_LEN 64
-#endif
 
 #define MAX_VA (1UL << VA_LEN)
 

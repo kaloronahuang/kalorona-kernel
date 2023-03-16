@@ -58,6 +58,9 @@ build/kernel.elf: $(OBJS) kernel.ld
 build/fs.img: build/kernel.elf
 	sudo sh scripts/mkfs.sh
 
+%.ld: %.lds.S
+	$(CC) $(INCLUDE_PARAMS) -E -P -x c $< > $@
+
 kernel: build/fs.img
 
 kernel-image-report: build/kernel.elf
@@ -65,7 +68,7 @@ kernel-image-report: build/kernel.elf
 
 clean:
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
-	*/*.d */*.asm */*.sym \
+	*/*.d */*.asm */*.sym *.ld \
 	$(OBJS) \
 	$(D_FILES)
 	rm -rf build/

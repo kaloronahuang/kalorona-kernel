@@ -1,6 +1,7 @@
 // vmem.c
+/*
 #include <vmem.h>
-#include <string.h>
+#include <utilities/string.h>
 #include <signal.h>
 #include <asm/spriv.h>
 #include <console.h>
@@ -15,7 +16,7 @@ pte_t *vm_walk(pagetable_t pgtbl, uint64 va, int alloc)
 {
     if (va >= MAX_VA)
         return NULL;
-    for (int lv = VMEM_LEVEL; lv; lv--)
+    for (int lv = VA_N_VPN - 1; lv; lv--)
     {
         pte_t *e = &pgtbl[VA_GET_PN(lv, va)];
         if ((*e) & PTE_FLAG_V)
@@ -77,3 +78,4 @@ void vm_hart_enable(void)
     w_satp(SATP(VMEM_MODE, kernel_pagetable));
     sfence_vma();
 }
+*/

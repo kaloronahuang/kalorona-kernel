@@ -2,15 +2,14 @@
 # To create a stack for C-compiled program and handover control to C world.
 
 # Useful in linking;
-.section .entry
+.section .text
+
 .global __entry
 __entry:
-    # Create the stack for C world;
-    # There will be MAX_CPU stacks;
-    # Load data to the right stack;
-    # SBI offers hartid at a0, fdt_tree at a1;
-    # Get a copy of hartid at a2;
-    mv a2, a0
+    # Handing over from U-Boot or other bootloaders;
+    # tp register has been written, use it to calculate stack position;
+    # a0, a1 - argc, argv
+    mv a2, tp
     # Set the size of the stack for each hart;
     li a3, 4096
     # Set the stack pointer;

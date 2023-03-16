@@ -17,11 +17,10 @@ static void device_walk_fdt(struct fdt_header *fdt, int node_offset)
         device_walk_fdt(fdt, subnode_offset);
 }
 
-void device_init_by_fdt(void)
+void device_init_by_fdt(struct fdt_header *fdt)
 {
     printf("[device]flattened device tree detected\n");
     // check and brief the device tree;
-    struct fdt_header *fdt = flatten_device_tree;
     if (fdt_check_header(fdt) != 0)
         panic("device_init_by_fdt corrupt fdt");
     printf("[device]fdt addr: %p\n", fdt);
@@ -35,5 +34,5 @@ void device_init_by_fdt(void)
 
 void device_init(void)
 {
-    device_init_by_fdt();
+    /* device_init_by_fdt(); */
 }
