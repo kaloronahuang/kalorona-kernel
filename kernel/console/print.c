@@ -4,7 +4,7 @@
 #include <stdarg.h>
 #include <types.h>
 
-static const char *digits = "0123456789abcddef";
+static const char *digits = "0123456789abcdef";
 
 struct console_lock_struct console_lock;
 

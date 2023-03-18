@@ -10,7 +10,8 @@
 
 extern char *kmem_head;
 
-struct kmem_freepage {
+struct kmem_freepage
+{
     struct kmem_freepage *nxt;
 };
 
@@ -19,7 +20,7 @@ void *kmem_alloc(void);
 void kmem_free(void *phy_addr);
 
 // Page definitions;
-#define PAGE_SIZE 0x1000
+#define PAGE_SIZE 0x1000ULL
 #define PAGE_SIZE_OFFSET 3
 
 #define PAGE_ROUND_UP(x) (((x) + PAGE_SIZE - 1) & (~(PAGE_SIZE - 1)))

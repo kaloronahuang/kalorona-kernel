@@ -5,20 +5,20 @@
 
 #define KIMAGE_DEFS
 
-extern char PA_BEGIN[];
+extern uint64 PA_BEGIN[];
 
-extern char MEMORY_BEGIN[];
+extern uint64 MEMORY_BEGIN[];
 
-extern char KERNEL_IMG_PA_BEGIN[];
-extern char KERNEL_IMG_PA_END[];
-extern char KERNEL_IMG_VA_BEGIN[];
-extern char KERNEL_IMG_VA_END[];
+extern uint64 KERNEL_IMG_PA_BEGIN;
+extern uint64 KERNEL_IMG_PA_END;
+extern uint64 KERNEL_IMG_VA_BEGIN;
+extern uint64 KERNEL_IMG_VA_END;
 
-extern char BOOT_SECTION_PA_BEGIN[];
+extern uint64 BOOT_SECTION_PA_BEGIN;
 
-extern char KERNEL_TEXT_PA_BEGIN[];
-extern char KERNEL_RODATA_PA_BEGIN[];
-extern char KERNEL_DATA_PA_BEGIN[];
-extern char KERNEL_BSS_PA_BEGIN[];
+extern uint64 KERNEL_TEXT_PA_BEGIN;
+extern uint64 KERNEL_RODATA_PA_BEGIN;
+extern uint64 KERNEL_DATA_PA_BEGIN;
+extern uint64 KERNEL_BSS_PA_BEGIN;
 
 #endif

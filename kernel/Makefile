@@ -5,8 +5,10 @@ OBJS = \
 	asm/sbi.o \
 	utilities/string.o \
 	utilities/bytes.o \
+	utilities/algorithm.o \
 	console/print.o \
 	device/memory.o \
+	kimage_defs.o \
 	device.o \
 	proc/hart.o \
 	spinlock.o \
@@ -93,7 +95,7 @@ qemu-uboot: build/fs.img
 	$(QEMU) $(QEMU_MACHINE_FLAGS) $(UBOOT_FLAGS) $(KERNEL_FS_FLAGS)
 
 qemu-dump-dtb:
-	$(QEMU) $(QEMU_MACHINE_FLAGS) $(OPENSBI_FLAGS) $(KERNEL_IMG_FLAGS) -machine dumpdtb=qemu.dtb
+	$(QEMU) $(QEMU_MACHINE_FLAGS) $(UBOOT_FLAGS) $(KERNEL_FS_FLAGS) -machine dumpdtb=qemu.dtb
 	dtc -o qemu.dts -O dts -I dtb qemu.dtb
 
 qemu-debug-sbi: build/kernel.elf

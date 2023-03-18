@@ -16,15 +16,15 @@ SECTIONS
 {
     . = 0x0;
 
-    PROVIDE(PA_BEGIN = .);
-    PROVIDE(KERNEL_IMG_PA_BEGIN = .);
+    PROVIDE(__PA_BEGIN = .);
+    PROVIDE(__KERNEL_IMG_PA_BEGIN = .);
 
     . = 0x80000000;
 
-    PROVIDE(MEMORY_BEGIN = .);
+    PROVIDE(__MEMORY_BEGIN = .);
     
     . += 2M;
-    PROVIDE(BOOT_SECTION_PA_BEGIN = .);
+    PROVIDE(__BOOT_SECTION_PA_BEGIN = .);
     
     .boot.text : {
         boot/entry.o (.text)
@@ -47,24 +47,24 @@ SECTIONS
     }
 
     . = ALIGN(0x1000);
-    PROVIDE(KERNEL_TEXT_PA_BEGIN = .);
+    PROVIDE(__KERNEL_TEXT_PA_BEGIN = .);
 
     . = VMEM_KERNEL_SPACE_VA_BEGIN;
-    PROVIDE(KERNEL_IMG_VA_BEGIN = .);
+    PROVIDE(__KERNEL_IMG_VA_BEGIN = .);
 
     /*
         Virtual Memory Space;
         .boot lies here;
     */
 
-    . += KERNEL_TEXT_PA_BEGIN - KERNEL_IMG_PA_BEGIN;
+    . += __KERNEL_TEXT_PA_BEGIN - __KERNEL_IMG_PA_BEGIN;
 
-    .text : AT(KERNEL_TEXT_PA_BEGIN) {
+    .text : AT(__KERNEL_TEXT_PA_BEGIN) {
         *(.text .text.*)
     }
     . = ALIGN(0x1000);
 
-    PROVIDE(KERNEL_RODATA_PA_BEGIN = SECTION_PA(.text, 0x1000));
+    PROVIDE(__KERNEL_RODATA_PA_BEGIN = SECTION_PA(.text, 0x1000));
     .rodata : AT(SECTION_PA(.text, 0x1000)) {
         *(.srodata .srodata.*)
         . = ALIGN(16);
@@ -73,7 +73,7 @@ SECTIONS
     }
     . = ALIGN(0x1000);
 
-    PROVIDE(KERNEL_DATA_PA_BEGIN = SECTION_PA(.rodata, 0x1000));
+    PROVIDE(__KERNEL_DATA_PA_BEGIN = SECTION_PA(.rodata, 0x1000));
     .data : AT(SECTION_PA(.rodata, 0x1000)) {
         *(.sdata .sdata.*)
         . = ALIGN(16);
@@ -82,7 +82,7 @@ SECTIONS
     }
     . = ALIGN(0x1000);
 
-    PROVIDE(KERNEL_BSS_PA_BEGIN = SECTION_PA(.data, 0x1000));
+    PROVIDE(__KERNEL_BSS_PA_BEGIN = SECTION_PA(.data, 0x1000));
     .bss : AT(SECTION_PA(.data, 0x1000)) {
         *(.sbss .sbss.*)
         . = ALIGN(16);
@@ -91,6 +91,6 @@ SECTIONS
     }
     . = ALIGN(0x1000);
 
-    PROVIDE(KERNEL_IMG_VA_END = .);
-    PROVIDE(KERNEL_IMG_PA_END = SECTION_PA(.bss, 0x1000));
+    PROVIDE(__KERNEL_IMG_VA_END = .);
+    PROVIDE(__KERNEL_IMG_PA_END = SECTION_PA(.bss, 0x1000));
 }

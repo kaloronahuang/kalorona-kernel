@@ -12,12 +12,17 @@
 #include <kmem.h>
 #include <proc.h>
 #include <vmem.h>
+#include <kimage_defs.h>
 #include <device.h>
 
 struct boot_command vboot_cmd;
 
 void kernel_main(int argc, char *const argv[])
 {
+    if (argc == 1)
+    {
+        flatten_device_tree = (struct fdt_header *)(strtoul(argv[0], NULL, 16));
+    }
     /* copy the arguments; */
     size_t argv_ptr = 0;
     vboot_cmd.argc = argc;
@@ -29,13 +34,16 @@ void kernel_main(int argc, char *const argv[])
             vboot_cmd.argv[argv_ptr++] = argv[i][ptr];
         } while (argv[i][ptr++] != '\0');
     }
-    /* Initialize; */
     console_init();
-    printf("[kernel] vkernel running\n");
-    printf("[kernel] boot argc: %d\n", vboot_cmd.argc);
+    printf("[kernel]vkernel running\n");
+    printf("[kernel]boot argc: %d\n", vboot_cmd.argc);
+    printf("%p\n", KERNEL_IMG_PA_END);
     for (int i = 0, j = 0; i < vboot_cmd.argc; i++)
     {
-        printf("[kernel] - \"%s\"\n", vboot_cmd.argv + j);
+        printf("[kernel]- \"%s\"\n", vboot_cmd.argv + j);
         j += strlen(vboot_cmd.argv + j) + 1;
     }
+    device_init();
+    sbi_srst_system_reset(0, 0);
+    return 0;
 }
