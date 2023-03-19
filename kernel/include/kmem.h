@@ -17,7 +17,7 @@ struct kmem_freepage
 
 void kmem_init(void);
 void *kmem_alloc(void);
-void kmem_free(void *phy_addr);
+void kmem_free(void *addr);
 
 // Page definitions;
 #define PAGE_SIZE 0x1000ULL

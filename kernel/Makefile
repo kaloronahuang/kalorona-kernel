@@ -57,7 +57,10 @@ build/kernel.elf: $(OBJS) kernel.ld
 	mkdir build/
 	$(LD) $(LD_FLAGS) -T kernel.ld -o build/kernel.elf $(OBJS)
 
-build/fs.img: build/kernel.elf
+scripts/boot.scr: scripts/boot.script
+	mkimage -c none -A riscv -T script -d scripts/boot.script scripts/boot.scr
+
+build/fs.img: build/kernel.elf scripts/boot.scr
 	sudo sh scripts/mkfs.sh
 
 %.ld: %.lds.S
@@ -72,7 +75,8 @@ clean:
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
 	*/*.d */*.asm */*.sym *.ld \
 	$(OBJS) \
-	$(D_FILES)
+	$(D_FILES) \
+	scripts/boot.scr
 	rm -rf build/
 
 QEMU = qemu-system-riscv64

@@ -3,6 +3,7 @@
 #include <lock.h>
 #include <signal.h>
 #include <utilities/string.h>
+#include <device/memory.h>
 
 struct
 {
@@ -10,18 +11,16 @@ struct
     struct spinlock lock;
 } kmem;
 
-extern char KERNEL_END[];
-
-char *kmem_head;
-
 void kmem_init(void)
 {
     spinlock_init(&kmem.lock, "kernel_mem_lock");
-    /*
-    kmem_head = (char *)(PAGE_ROUND_UP((uint64)(KERNEL_END)));
-    for (char *ptr = kmem_head; ptr < kmem_head + KMEM_SIZE; ptr += PAGE_SIZE)
-        kmem_free(ptr);
-    */
+    for (int seg_id = 0; seg_id < ram_descriptor.available_ram_segments_num; seg_id++)
+    {
+        char *p = ram_descriptor.available_ram_segments[seg_id].pa_begin;
+        size_t len = ram_descriptor.available_ram_segments[seg_id].pa_len;
+        while (len)
+            kmem_free((void *)p), len -= PAGE_SIZE, p += PAGE_SIZE;
+    }
 }
 
 void *kmem_alloc(void)
@@ -39,16 +38,16 @@ void *kmem_alloc(void)
     return (void *)ptr;
 }
 
-void kmem_free(void *phy_addr)
+void kmem_free(void *addr)
 {
     struct kmem_freepage *ptr;
 
-    if (((char *)(phy_addr) >= (kmem_head + KMEM_SIZE)) || ((char *)(phy_addr) < kmem_head) || ((((uint64)phy_addr) & (PAGE_SIZE - 1)) != 0))
+    if (((((uint64)addr) & (PAGE_SIZE - 1)) != 0) /* TODO: more expressions to go */)
         panic("kmem_free");
 
-    memset(phy_addr, 0, PAGE_SIZE);
+    memset(addr, 0, PAGE_SIZE);
 
-    ptr = (struct kmem_freepage *)phy_addr;
+    ptr = (struct kmem_freepage *)addr;
 
     spinlock_acquire(&kmem.lock);
     ptr->nxt = kmem.freepage_head;
