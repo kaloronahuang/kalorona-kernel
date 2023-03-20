@@ -68,8 +68,8 @@ static void device_calc_available_ram()
 
 static void device_fdt_get_reg(struct fdt_header *fdt, int node_offset, uint64 *p1, uint64 *p2)
 {
-    struct fdt_property *reg_prop = fdt_get_property(fdt, node_offset, "reg", NULL);
-    uint64 *reg_ptr = reg_prop->data;
+    const struct fdt_property *reg_prop = fdt_get_property(fdt, node_offset, "reg", NULL);
+    uint64 *reg_ptr = (uint64 *)reg_prop->data;
     *p1 = fdt64_to_cpu(*reg_ptr);
     reg_ptr++;
     *p2 = fdt64_to_cpu(*reg_ptr);

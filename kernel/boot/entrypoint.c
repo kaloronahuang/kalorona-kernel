@@ -11,7 +11,7 @@
 
 __attribute__((aligned(16))) char init_stack[4096];
 __attribute__((aligned(4096))) pte_t pkernel_pgtbl[1 << 9];
-extern void (*vkernel_main)(int, char *const *);
+extern void (*vkernel_entry)(int, char *const *);
 
 // Read arguments from the bootloader, and start kernel booting;
 ulong kernel_entrypoint(int argc, char *const argv[])
@@ -42,6 +42,6 @@ ulong kernel_entrypoint(int argc, char *const argv[])
     sfence_vma();
     w_satp(SATP(VMEM_MODE, pkernel_pgtbl));
     // Handover to vkernel;
-    vkernel_main(argc, argv);
+    vkernel_entry(argc, argv);
     return 0;
 }

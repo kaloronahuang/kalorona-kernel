@@ -12,7 +12,7 @@ void console_init()
 {
     spinlock_init(&(console_lock.lock), "console_lock");
     console_lock.locking_enabled = 1;
-    printf("[console]Console initialized.\n");
+    printf("[console]console initialized.\n");
 }
 
 static void print_char(char c)
@@ -59,8 +59,8 @@ int printf(const char *fmt, ...)
         return -1;
     if (console_lock.locking_enabled)
         spinlock_acquire(&(console_lock.lock));
-
-    char *param_ptr = (&fmt) + sizeof(fmt);
+    va_list ap;
+    va_start(ap, fmt);
     for (int i = 0; fmt[i]; i++)
     {
         if (fmt[i] != '%')
@@ -77,24 +77,20 @@ int printf(const char *fmt, ...)
         switch (c)
         {
         case 'd':
-            print_int(*((int32 *)param_ptr), 10);
-            param_ptr += sizeof(int32);
+            print_int(va_arg(ap, int32), 10);
             break;
         case 'x':
-            print_int(*((int32 *)param_ptr), 16);
-            param_ptr += sizeof(int32);
+            print_int(va_arg(ap, int32), 16);
             break;
         case 'p':
             print_char('0'), print_char('x');
-            print_uint(*((uint64 *)param_ptr), 16);
-            param_ptr += sizeof(uint64);
+            print_uint(va_arg(ap, uint64), 16);
             break;
         case 'u':
-            print_uint(*((uint32 *)param_ptr), 10);
-            param_ptr += sizeof(uint32);
+            print_uint(va_arg(ap, uint32), 10);
             break;
         case 's':
-            char *s = *((char **)param_ptr);
+            char *s = va_arg(ap, char *);
             if (s == NULL)
                 s = "(null)";
             for (; *s; s++)

@@ -8,10 +8,11 @@
 
 #define MAX_CPU 8
 
-// Kernel memory size;
-// 64MB by default;
-#define KMEM_SIZE 0x4000000
-#define KMEM_PAGE_COUNT (KMEM_SIZE >> PAGE_SIZE_OFFSET)
+// Stack size per CPU for vkernel;
+// 8 megabytes as default;
+#ifndef VKERNEL_STACK_SIZE
+#define VKERNEL_STACK_SIZE 0x800000
+#endif
 
 // Support toggles;
 

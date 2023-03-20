@@ -2,10 +2,11 @@
 # To create a stack for C-compiled program and handover control to C world.
 
 .section .data
-.global vkernel_main
-vkernel_main:
-    .dword kernel_main
+.global vkernel_entry
+vkernel_entry:
+    .dword __vkernel_entry
 
+.section .text
 .global __entry
 __entry:
     # Handing over from U-Boot or other bootloaders;

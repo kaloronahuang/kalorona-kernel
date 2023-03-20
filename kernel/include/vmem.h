@@ -26,7 +26,7 @@ typedef uint64 *pagetable_t;
 
 #define SATP(mode, pgtbl) (((mode) << 60) | (((uint64)pgtbl) >> PAGE_OFFSET_SHIFT))
 
-#define MAX_VA (1UL << VA_LEN)
+#define MAX_VA (~(0ULL))
 
 pte_t *vm_walk(pagetable_t pgtbl, uint64 va, int alloc);
 int vm_mappages(pagetable_t pgtbl, uint64 va, uint64 pa, size_t siz, uint64 flags);

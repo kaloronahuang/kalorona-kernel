@@ -13,6 +13,7 @@ OBJS = \
 	proc/hart.o \
 	spinlock.o \
 	signal.o \
+	vkernel_entry.o \
 	kmem.o \
 	vmem.o \
 	main.o
@@ -53,6 +54,12 @@ ifeq ($(UNAME_S),Darwin)
 	READELF = /usr/local/opt/binutils/bin/greadelf 
 endif
 
+%.ld: %.lds.S
+	$(CC) $(INCLUDE_PARAMS) -E -P -x c $< > $@
+
+%.o: %.S
+	$(CC) $(CFLAGS) -c -o $@ $<
+
 build/kernel.elf: $(OBJS) kernel.ld
 	mkdir build/
 	$(LD) $(LD_FLAGS) -T kernel.ld -o build/kernel.elf $(OBJS)
@@ -62,9 +69,6 @@ scripts/boot.scr: scripts/boot.script
 
 build/fs.img: build/kernel.elf scripts/boot.scr
 	sudo sh scripts/mkfs.sh
-
-%.ld: %.lds.S
-	$(CC) $(INCLUDE_PARAMS) -E -P -x c $< > $@
 
 kernel: build/fs.img
 
