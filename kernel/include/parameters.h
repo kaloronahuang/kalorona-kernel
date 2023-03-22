@@ -6,7 +6,7 @@
 
 // Parameters;
 
-#define MAX_CPU 8
+#define MAX_CPU 16
 
 // Stack size per CPU for vkernel;
 // 8 megabytes as default;

@@ -1,4 +1,4 @@
-// algorithm.c
+// qsort.c
 #include <utilities/algorithm.h>
 
 #define __qsort_impl(typ)                                   \

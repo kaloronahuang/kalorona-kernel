@@ -29,6 +29,26 @@ pte_t *vm_walk(pagetable_t pgtbl, uint64 va, int alloc)
     return &pgtbl[VA_GET_PN(0, va)];
 }
 
+// pgtbl points to the virtual address of the pagetable;
+// leaves must be cleared;
+void vm_freewalk(pagetable_t pgtbl)
+{
+    for (int i = 0; i < (1 << 9); i++)
+    {
+        pte_t pte = pgtbl[i];
+        if ((pte & PTE_FLAG_V) && (pte & (PTE_FLAG_R | PTE_FLAG_W | PTE_FLAG_X)) == 0)
+        {
+            // non-leaf;
+            uint64 nxt = VKERNEL_PA2VA(PTE_PA(pte));
+            vm_freewalk(nxt);
+            pgtbl[i] = 0;
+        }
+        else if (pte & PTE_FLAG_V)
+            panic("vm_freewalk - leaves");
+    }
+    kmem_free(pgtbl);
+}
+
 int vm_mappages(pagetable_t pgtbl, uint64 va, uint64 pa, size_t siz, uint64 flags)
 {
     if (siz == 0)
@@ -51,9 +71,18 @@ int vm_mappages(pagetable_t pgtbl, uint64 va, uint64 pa, size_t siz, uint64 flag
     return 0;
 }
 
-pagetable_t vm_make_kernel_pagetable(void)
+void vm_hart_enable(void)
+{
+    sfence_vma();
+    w_satp(SATP(VMEM_MODE, VKERNEL_VA2PA(kernel_pagetable)));
+    sfence_vma();
+}
+
+pagetable_t vm_kernel_make_pagetable(void)
 {
     pagetable_t tbl = (pagetable_t)kmem_alloc();
+    // Device registers;
+    vm_mappages(tbl, VKERNEL_PA2VA(0x0), 0x0, 0x80000000, PTE_FLAG_R | PTE_FLAG_W);
     // Kernel text;
     vm_mappages(tbl, VKERNEL_PA2VA(KERNEL_TEXT_PA_BEGIN), KERNEL_TEXT_PA_BEGIN, KERNEL_RODATA_PA_BEGIN - KERNEL_TEXT_PA_BEGIN, PTE_FLAG_R | PTE_FLAG_X);
     // Kernel data;
@@ -70,13 +99,39 @@ pagetable_t vm_make_kernel_pagetable(void)
 
 void vm_kernel_init(void)
 {
-    kernel_pagetable = vm_make_kernel_pagetable();
+    kernel_pagetable = vm_kernel_make_pagetable();
     printf("[vm]vkernel pagetable mapped\n");
 }
 
-void vm_hart_enable(void)
+pagetable_t vm_user_make_pagetable(void)
 {
-    sfence_vma();
-    w_satp(SATP(VMEM_MODE, VKERNEL_VA2PA(kernel_pagetable)));
-    sfence_vma();
+    pagetable_t ret = kmem_alloc();
+    if (ret == NULL)
+        panic("vm_user_make_pagetable - no space");
+    
+}
+
+uint64 vm_user_walk_addr(pagetable_t pgtbl, uint64 va)
+{
+    pte_t *pte = vm_walk(pgtbl, va, 0);
+    if (pte == NULL || (*pte & PTE_FLAG_V) == 0 || (*pte & PTE_FLAG_U) == 0)
+        return NULL;
+    return PTE_PA(pte) | (va & 0x1FF);
+}
+
+// va must be aligned;
+void vm_unmappages(pagetable_t pgtbl, uint64 va, size_t page_count, int do_free)
+{
+    if (va & 0x1FF)
+        panic("vm_unmappages - broken alignment");
+    uint64 bound = va + PAGE_SIZE * page_count;
+    for (uint64 v_addr = va; v_addr < bound; v_addr += PAGE_SIZE)
+    {
+        pte_t *entry = vm_walk(pgtbl, v_addr, 0);
+        if (entry == NULL || (*entry & PTE_FLAG_V) == 0 || (*entry & ((1ull << PTE_SHIFT) - 1)) == PTE_FLAG_V)
+            panic("vm_unmappages - broken entry");
+        if (do_free)
+            kmem_free(VKERNEL_PA2VA(PTE_PA(*entry)));
+        *entry = 0;
+    }
 }

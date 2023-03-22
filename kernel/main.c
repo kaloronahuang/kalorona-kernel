@@ -69,5 +69,6 @@ void kernel_main(int argc, char *const argv[])
     vm_kernel_init();
     vm_hart_enable();
     printf("[kernel]vkernel pagetable installed\n");
+    proc_init();
     sbi_srst_system_reset(0, 0);
 }

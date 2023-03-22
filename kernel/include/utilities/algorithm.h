@@ -5,6 +5,8 @@
 
 #define ALGORITHM
 
+// Quick Sort;
+
 #define qsort_def(typ) \
     void qsort_##typ(typ arr[], int len)
 

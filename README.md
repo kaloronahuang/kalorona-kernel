@@ -69,3 +69,7 @@ make qemu-debug-uboot
 ```
 
 A TCP port will be exposed for GDB debugging. It is typically 25501. The `.gdbinit` file at the root of the repo may be helpful for GDB configuration.
+
+## References
+
+- xv6, a simple Unix-like teaching operating system, MIT PDOS, https://github.com/mit-pdos/xv6-riscv

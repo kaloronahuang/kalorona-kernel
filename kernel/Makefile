@@ -3,14 +3,17 @@ OBJS = \
 	boot/entry.o \
 	boot/entrypoint.o \
 	asm/sbi.o \
+	utilities/algorithm/qsort.o \
 	utilities/string.o \
 	utilities/bytes.o \
-	utilities/algorithm.o \
 	console/print.o \
 	device/memory.o \
+	proc/hart.o \
+	proc/proc.o \
+	proc/trap_handler.o \
+	proc/trap.o \
 	kimage_defs.o \
 	device.o \
-	proc/hart.o \
 	spinlock.o \
 	signal.o \
 	vkernel_entry.o \
