@@ -6,7 +6,7 @@
 #include <kimage_defs.h>
 #include <signal.h>
 
-struct ram_descriptor_t ram_descriptor;
+struct ram_descriptor_struct ram_descriptor;
 
 static uint64 __sort_seg_begin[MAX_RAM_SEGMENT], __sort_seg_end[MAX_RAM_SEGMENT], __sort_seg_num;
 

@@ -8,7 +8,7 @@
 
 #define PROC
 
-struct context_t
+struct context_struct
 {
     uint64 ra;
     uint64 sp;
@@ -28,7 +28,7 @@ struct context_t
     uint64 s11;
 };
 
-struct trapframe_t
+struct trapframe_struct
 {
     uint64 kernel_satp;
     uint64 kernel_sp;
@@ -68,21 +68,21 @@ struct trapframe_t
     uint64 t6;
 };
 
-struct hart_t
+struct hart_struct
 {
-    struct proc_t *running_proc;
-    struct context_t cxt;
+    struct proc_struct *running_proc;
+    struct context_struct cxt;
     int trap_pushoff_dep;
     int trap_enabled;
 };
 
 extern size_t hart_count;
 
-extern struct hart_t harts[MAX_CPU];
+extern struct hart_struct harts[MAX_CPU];
 
 uint current_hart_id(void);
 
-struct hart_t *current_hart(void);
+struct hart_struct *current_hart(void);
 
 void pushoff_hart(void);
 
@@ -98,7 +98,7 @@ enum procstate
     ZOMBIE
 };
 
-struct proc_t
+struct proc_struct
 {
     struct spinlock lock;
 
@@ -107,13 +107,13 @@ struct proc_t
     int killed;
     int exit_status;
 
-    struct proc_t *parent;
+    struct proc_struct *parent;
 
     void *stack_addr;
     size_t mem_siz;
     pagetable_t pgtbl;
-    struct trapframe_t *trapframe;
-    struct context_t context;
+    struct trapframe_struct *trapframe;
+    struct context_struct context;
 };
 
 void proc_init(void);

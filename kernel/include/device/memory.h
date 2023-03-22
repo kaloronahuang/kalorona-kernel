@@ -7,19 +7,19 @@
 
 #define MAX_RAM_SEGMENT 1024
 
-struct ram_segment_descriptor_t
+struct ram_segment_descriptor_struct
 {
     uint64 pa_begin, pa_len;
 };
 
-struct ram_descriptor_t
+struct ram_descriptor_struct
 {
-    struct ram_segment_descriptor_t ram;
+    struct ram_segment_descriptor_struct ram;
     size_t available_ram_segments_num;
-    struct ram_segment_descriptor_t available_ram_segments[MAX_RAM_SEGMENT];
+    struct ram_segment_descriptor_struct available_ram_segments[MAX_RAM_SEGMENT];
 };
 
-extern struct ram_descriptor_t ram_descriptor;
+extern struct ram_descriptor_struct ram_descriptor;
 
 void device_memory_init(struct fdt_header *fdt);
 
