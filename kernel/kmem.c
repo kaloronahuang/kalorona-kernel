@@ -22,8 +22,9 @@ void kmem_init(void)
     {
         char *p = (char *)ram_descriptor.available_ram_segments[seg_id].pa_begin;
         size_t len = ram_descriptor.available_ram_segments[seg_id].pa_len;
-        while (len)
-            kmem_free((void *)VKERNEL_PA2VA(p)), len -= PAGE_SIZE, p += PAGE_SIZE;
+        size_t offset = 0;
+        while (offset + PAGE_SIZE <= len)
+            kmem_free((void *)PMA_PA2VA(p)), offset += PAGE_SIZE, p += PAGE_SIZE;
     }
     printf("[kmem]initliazed. # available pages: %d\n", (int32)kmem.num_available_page);
 }
@@ -48,7 +49,7 @@ void kmem_free(void *addr)
 {
     struct kmem_freepage *ptr;
 
-    if (((((uint64)addr) & (PAGE_SIZE - 1)) != 0) || ((uint64)addr) < (uint64)KERNEL_IMG_VA_END )
+    if (((((uint64)addr) & (PAGE_SIZE - 1)) != 0))
         panic("kmem_free");
 
     /* memset(addr, 0, PAGE_SIZE); */

@@ -21,7 +21,7 @@ pte_t *vm_walk(pagetable_t pgtbl, uint64 va, int alloc)
             if (!alloc || (pgtbl = (pagetable_t)kmem_alloc()) == 0)
                 return NULL;
             memset(pgtbl, 0, PAGE_SIZE);
-            *e = PA_PTE(VKERNEL_VA2PA(pgtbl)) | PTE_FLAG_V;
+            *e = PA_PTE(PMA_VA2PA(pgtbl)) | PTE_FLAG_V;
         }
     }
     return &pgtbl[VA_GET_PN(0, va)];
@@ -37,7 +37,7 @@ void vm_freewalk(pagetable_t pgtbl)
         if ((pte & PTE_FLAG_V) && (pte & (PTE_FLAG_R | PTE_FLAG_W | PTE_FLAG_X)) == 0)
         {
             // non-leaf;
-            uint64 nxt = VKERNEL_PA2VA(PTE_PA(pte));
+            uint64 nxt = PMA_PA2VA(PTE_PA(pte));
             vm_freewalk((pagetable_t)nxt);
             pgtbl[i] = 0;
         }
@@ -72,7 +72,7 @@ int vm_mappages(pagetable_t pgtbl, uint64 va, uint64 pa, size_t siz, uint64 flag
 void vm_hart_enable(void)
 {
     sfence_vma();
-    w_satp(SATP(VMEM_MODE, VKERNEL_VA2PA(kernel_pagetable)));
+    w_satp(SATP(VMEM_MODE, PMA_VA2PA(kernel_pagetable)));
     sfence_vma();
 }
 
@@ -80,17 +80,17 @@ pagetable_t vm_kernel_make_pagetable(void)
 {
     pagetable_t tbl = (pagetable_t)kmem_alloc();
     // Device registers;
-    vm_mappages(tbl, VKERNEL_PA2VA(0x0), 0x0, 0x80000000, PTE_FLAG_R | PTE_FLAG_W);
+    vm_mappages(tbl, PMA_PA2VA(0x0), 0x0, 0x80000000, PTE_FLAG_R | PTE_FLAG_W);
     // Kernel text;
-    vm_mappages(tbl, VKERNEL_PA2VA(KERNEL_TEXT_PA_BEGIN), (uint64)KERNEL_TEXT_PA_BEGIN, (uint64)KERNEL_RODATA_PA_BEGIN - (uint64)KERNEL_TEXT_PA_BEGIN, PTE_FLAG_R | PTE_FLAG_X);
+    vm_mappages(tbl, PMA_PA2VA(KERNEL_TEXT_PA_BEGIN), (uint64)KERNEL_TEXT_PA_BEGIN, (uint64)KERNEL_RODATA_PA_BEGIN - (uint64)KERNEL_TEXT_PA_BEGIN, PTE_FLAG_R | PTE_FLAG_X);
     // Kernel data;
-    vm_mappages(tbl, VKERNEL_PA2VA(KERNEL_RODATA_PA_BEGIN), (uint64)KERNEL_RODATA_PA_BEGIN, (uint64)KERNEL_IMG_PA_END - (uint64)KERNEL_RODATA_PA_BEGIN, PTE_FLAG_R | PTE_FLAG_W);
+    vm_mappages(tbl, PMA_PA2VA(KERNEL_RODATA_PA_BEGIN), (uint64)KERNEL_RODATA_PA_BEGIN, (uint64)KERNEL_IMG_PA_END - (uint64)KERNEL_RODATA_PA_BEGIN, PTE_FLAG_R | PTE_FLAG_W);
     // Kernel memory pool;
     for (int seg_id = 0; seg_id < ram_descriptor.available_ram_segments_num; seg_id++)
     {
         uint64 pa = ram_descriptor.available_ram_segments[seg_id].pa_begin;
         size_t len = ram_descriptor.available_ram_segments[seg_id].pa_len;
-        vm_mappages(tbl, VKERNEL_PA2VA(pa), (uint64)pa, len, PTE_FLAG_R | PTE_FLAG_W);
+        vm_mappages(tbl, PMA_PA2VA(pa), (uint64)pa, len, PTE_FLAG_R | PTE_FLAG_W);
     }
     return tbl;
 }
@@ -129,7 +129,7 @@ void vm_unmappages(pagetable_t pgtbl, uint64 va, size_t page_count, int do_free)
         if (entry == NULL || (*entry & PTE_FLAG_V) == 0 || (*entry & ((1ull << PTE_FLAGS_WIDTH) - 1)) == PTE_FLAG_V)
             panic("vm_unmappages - broken entry");
         if (do_free)
-            kmem_free((void *)VKERNEL_PA2VA(PTE_PA(*entry)));
+            kmem_free((void *)PMA_PA2VA(PTE_PA(*entry)));
         *entry = 0;
     }
 }

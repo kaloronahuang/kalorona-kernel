@@ -6,8 +6,8 @@
 
 struct fdt_header *flatten_device_tree;
 
-// 16MB FDT Blob;
-char fdt_blob[16 * (1 << 20)];
+// 4MB FDT Blob;
+char fdt_blob[4 * (1 << 20)];
 
 static void device_init_node(struct fdt_header *fdt, int node_offset)
 {

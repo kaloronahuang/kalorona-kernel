@@ -28,6 +28,15 @@ __attribute__((section(".boot.text"))) void setup_mmu(void)
         pte |= PA_PTE(p_addr);
         pkernel_pgtbl[VA_N_VPN - 3][phy_pn] = pte;
     }
+    
+    // setup Physical Memory Access (PMA);
+    for (uint64 phy_pn = 0; phy_pn != (1ul << 7); phy_pn++)
+    {
+        pte_t pte = (PTE_FLAG_V | PTE_FLAG_R | PTE_FLAG_W | PTE_FLAG_X);
+        uint64 p_addr = (phy_pn << ((VA_N_VPN - 1) * PN_WIDTH + PAGE_OFFSET_WIDTH));
+        pte |= PA_PTE(p_addr);
+        pkernel_pgtbl[VA_N_VPN - 3][phy_pn | (1ul << 8)] = pte;
+    }
 
     // connecting high pagtables;
     for (uint64 i = VA_N_VPN - 3; i != 0; i--)

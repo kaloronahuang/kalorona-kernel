@@ -92,14 +92,14 @@
 #define PTE_PA(pte) ((((uint64)(pte)) >> PTE_FLAGS_WIDTH) << PAGE_OFFSET_WIDTH)
 #define SATP(mode, pgtbl) ((((uint64)mode) << VMEM_MODE_SHIFT) | (((uint64)pgtbl) >> PAGE_OFFSET_WIDTH))
 
-#define VKERNEL_VA2PA(va) (((unsigned long long)(va)) & (~VA_KERNEL_BEGIN))
-#define VKERNEL_PA2VA(pa) (((unsigned long long)(pa)) | VA_KERNEL_BEGIN)
-
 #ifndef __ASSEMBLER__
 
 #include <types.h>
 #include <kmem.h>
 #include <parameters.h>
+
+#define PMA_VA2PA(va) (((uint64)(va)) & (~VA_KERNEL_BEGIN))
+#define PMA_PA2VA(pa) (((uint64)(pa)) | VA_KERNEL_BEGIN)
 
 typedef uint64 pte_t;
 typedef uint64 *pagetable_t;

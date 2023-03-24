@@ -25,31 +25,20 @@ extern char __KERNEL_IMG_VA_END[];
 
 #else
 
-#ifndef __ASSEMBLER__
+extern uint64 PA_BEGIN;
 
-extern char PA_BEGIN[];
+extern uint64 KERNEL_IMG_PA_BEGIN;
+extern uint64 MEMORY_PA_BEGIN;
 
-extern char KERNEL_IMG_PA_BEGIN[];
-extern char MEMORY_PA_BEGIN[];
+extern uint64 KERNEL_TEXT_PA_BEGIN;
+extern uint64 KERNEL_RODATA_PA_BEGIN;
+extern uint64 KERNEL_DATA_PA_BEGIN;
+extern uint64 KERNEL_BSS_PA_BEGIN;
 
-extern char KERNEL_TEXT_PA_BEGIN[];
-extern char KERNEL_RODATA_PA_BEGIN[];
-extern char KERNEL_DATA_PA_BEGIN[];
-extern char KERNEL_BSS_PA_BEGIN[];
+extern uint64 KERNEL_IMG_PA_END;
 
-extern char KERNEL_IMG_PA_END[];
-
-extern char KERNEL_IMG_VA_BEGIN[];
-extern char KERNEL_IMG_VA_END[];
-
-#else
-
-#define KIMAGE_SYMOL(name) \
-    .global name \
-    name: \
-        .dword __##name
-
-#endif
+extern uint64 KERNEL_IMG_VA_BEGIN;
+extern uint64 KERNEL_IMG_VA_END;
 
 #endif
 
