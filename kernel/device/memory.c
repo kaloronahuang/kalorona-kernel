@@ -5,6 +5,7 @@
 #include <device.h>
 #include <kimage_defs.h>
 #include <signal.h>
+#include <console.h>
 
 struct ram_descriptor_struct ram_descriptor;
 
@@ -14,7 +15,7 @@ static void device_calc_available_ram()
 {
     // to avoid the kernel image;
     __sort_seg_begin[__sort_seg_num] = ram_descriptor.ram.pa_begin;
-    __sort_seg_end[__sort_seg_num] = KERNEL_IMG_PA_END;
+    __sort_seg_end[__sort_seg_num] = (uint64)KERNEL_IMG_PA_END;
     __sort_seg_num++;
     // align the memory page;
     for (int i = 0; i < __sort_seg_num; i++)

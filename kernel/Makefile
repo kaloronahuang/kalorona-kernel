@@ -2,6 +2,7 @@
 OBJS = \
 	boot/entry.o \
 	boot/entrypoint.o \
+	boot/setup_mmu.o \
 	asm/sbi.o \
 	utilities/algorithm/qsort.o \
 	utilities/string.o \

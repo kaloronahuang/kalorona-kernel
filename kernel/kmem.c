@@ -48,7 +48,7 @@ void kmem_free(void *addr)
 {
     struct kmem_freepage *ptr;
 
-    if (((((uint64)addr) & (PAGE_SIZE - 1)) != 0) || ((uint64)addr) < KERNEL_IMG_VA_END )
+    if (((((uint64)addr) & (PAGE_SIZE - 1)) != 0) || ((uint64)addr) < (uint64)KERNEL_IMG_VA_END )
         panic("kmem_free");
 
     /* memset(addr, 0, PAGE_SIZE); */

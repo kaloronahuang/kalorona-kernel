@@ -1,6 +1,5 @@
 // trap.c
 #include <vmem.h>
-#include <vmem_defs.h>
 
 void usertrap_kernel_handler(void)
 {

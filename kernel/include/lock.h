@@ -9,7 +9,7 @@ struct spinlock
 {
     uint locked;
     char *description;
-    struct hart *hart;
+    struct hart_struct *hart;
 };
 
 void spinlock_init(struct spinlock *lk, char *description);

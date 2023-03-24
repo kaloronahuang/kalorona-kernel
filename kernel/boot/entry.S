@@ -1,12 +1,12 @@
 # entry.S
 # To create a stack for C-compiled program and handover control to C world.
 
-.section .data
+.section .boot.bss
 .global vkernel_entry
 vkernel_entry:
     .dword __vkernel_entry
 
-.section .text
+.section .boot.text
 .global __entry
 __entry:
     # Handing over from U-Boot or other bootloaders;

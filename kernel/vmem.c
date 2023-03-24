@@ -11,8 +11,6 @@ pagetable_t kernel_pagetable;
 
 pte_t *vm_walk(pagetable_t pgtbl, uint64 va, int alloc)
 {
-    if ((va & (1ull << (VA_LEN - 1))) == 0)
-        return NULL;
     for (int lv = VA_N_VPN - 1; lv; lv--)
     {
         pte_t *e = &pgtbl[VA_GET_PN(lv, va)];
@@ -40,7 +38,7 @@ void vm_freewalk(pagetable_t pgtbl)
         {
             // non-leaf;
             uint64 nxt = VKERNEL_PA2VA(PTE_PA(pte));
-            vm_freewalk(nxt);
+            vm_freewalk((pagetable_t)nxt);
             pgtbl[i] = 0;
         }
         else if (pte & PTE_FLAG_V)
@@ -84,9 +82,9 @@ pagetable_t vm_kernel_make_pagetable(void)
     // Device registers;
     vm_mappages(tbl, VKERNEL_PA2VA(0x0), 0x0, 0x80000000, PTE_FLAG_R | PTE_FLAG_W);
     // Kernel text;
-    vm_mappages(tbl, VKERNEL_PA2VA(KERNEL_TEXT_PA_BEGIN), KERNEL_TEXT_PA_BEGIN, KERNEL_RODATA_PA_BEGIN - KERNEL_TEXT_PA_BEGIN, PTE_FLAG_R | PTE_FLAG_X);
+    vm_mappages(tbl, VKERNEL_PA2VA(KERNEL_TEXT_PA_BEGIN), (uint64)KERNEL_TEXT_PA_BEGIN, (uint64)KERNEL_RODATA_PA_BEGIN - (uint64)KERNEL_TEXT_PA_BEGIN, PTE_FLAG_R | PTE_FLAG_X);
     // Kernel data;
-    vm_mappages(tbl, VKERNEL_PA2VA(KERNEL_RODATA_PA_BEGIN), KERNEL_RODATA_PA_BEGIN, KERNEL_IMG_PA_END - KERNEL_RODATA_PA_BEGIN, PTE_FLAG_R | PTE_FLAG_W);
+    vm_mappages(tbl, VKERNEL_PA2VA(KERNEL_RODATA_PA_BEGIN), (uint64)KERNEL_RODATA_PA_BEGIN, (uint64)KERNEL_IMG_PA_END - (uint64)KERNEL_RODATA_PA_BEGIN, PTE_FLAG_R | PTE_FLAG_W);
     // Kernel memory pool;
     for (int seg_id = 0; seg_id < ram_descriptor.available_ram_segments_num; seg_id++)
     {
@@ -108,7 +106,7 @@ pagetable_t vm_user_make_pagetable(void)
     pagetable_t ret = kmem_alloc();
     if (ret == NULL)
         panic("vm_user_make_pagetable - no space");
-    
+    // TODO;
 }
 
 uint64 vm_user_walk_addr(pagetable_t pgtbl, uint64 va)
@@ -128,10 +126,10 @@ void vm_unmappages(pagetable_t pgtbl, uint64 va, size_t page_count, int do_free)
     for (uint64 v_addr = va; v_addr < bound; v_addr += PAGE_SIZE)
     {
         pte_t *entry = vm_walk(pgtbl, v_addr, 0);
-        if (entry == NULL || (*entry & PTE_FLAG_V) == 0 || (*entry & ((1ull << PTE_SHIFT) - 1)) == PTE_FLAG_V)
+        if (entry == NULL || (*entry & PTE_FLAG_V) == 0 || (*entry & ((1ull << PTE_FLAGS_WIDTH) - 1)) == PTE_FLAG_V)
             panic("vm_unmappages - broken entry");
         if (do_free)
-            kmem_free(VKERNEL_PA2VA(PTE_PA(*entry)));
+            kmem_free((void *)VKERNEL_PA2VA(PTE_PA(*entry)));
         *entry = 0;
     }
 }

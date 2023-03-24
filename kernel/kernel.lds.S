@@ -4,10 +4,11 @@
     This is NOT a linker script. Building system will build one based on given config.
 
 */
-#include <vmem_defs.h>
 
-#define ALIGN_EXP(x, exp) (((x) + (exp) - 1) & (~((exp) - 1)))
-#define SECTION_PA(prev_sec, align) ALIGN_EXP(LOADADDR(prev_sec) + SIZEOF(prev_sec), align)
+#define __ASSEMBLER__
+
+#include <vmem.h>
+#include <kernel.lds.h>
 
 OUTPUT_ARCH("riscv")
 ENTRY(__entry)
@@ -15,47 +16,20 @@ ENTRY(__entry)
 SECTIONS
 {
     . = 0x0;
-
     PROVIDE(__PA_BEGIN = .);
-    PROVIDE(__KERNEL_IMG_PA_BEGIN = .);
 
     . = 0x80000000;
-
-    PROVIDE(__MEMORY_BEGIN = .);
+    PROVIDE(__KERNEL_IMG_PA_BEGIN = .);
+    PROVIDE(__MEMORY_PA_BEGIN = .);
     
     . += 2M;
-    PROVIDE(__BOOT_SECTION_PA_BEGIN = .);
-    
-    .boot.text : {
-        boot/entry.o (.text)
-        boot/entrypoint.o (.text)
-    }
+    BOOT_SECTION
 
-    .boot.rodata : {
-        boot/entry.o (.rodata)
-        boot/entrypoint.o (.rodata)
-    }
-
-    .boot.data : {
-        boot/entry.o (.data)
-        boot/entrypoint.o (.data)
-    }
-
-    .boot.bss : {
-        boot/entry.o (.bss)
-        boot/entrypoint.o (.bss)
-    }
-
-    . = ALIGN(0x1000);
     PROVIDE(__KERNEL_TEXT_PA_BEGIN = .);
 
-    . = VMEM_KERNEL_SPACE_VA_BEGIN;
+    /* Kernel Addressing Space */
+    . = VA_KERNEL_IMG_BEGIN;
     PROVIDE(__KERNEL_IMG_VA_BEGIN = .);
-
-    /*
-        Virtual Memory Space;
-        .boot lies here;
-    */
 
     . += __KERNEL_TEXT_PA_BEGIN - __KERNEL_IMG_PA_BEGIN;
 
@@ -90,7 +64,7 @@ SECTIONS
         . = ALIGN(16);
     }
     . = ALIGN(0x1000);
-
+    
     PROVIDE(__KERNEL_IMG_VA_END = .);
     PROVIDE(__KERNEL_IMG_PA_END = SECTION_PA(.bss, 0x1000));
 }

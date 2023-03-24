@@ -5,5 +5,4 @@
 void proc_init(void)
 {
     printf("[proc]initializing user space");
-    sizeof(struct proc_struct);
 }

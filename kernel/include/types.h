@@ -4,6 +4,8 @@
 
 #define TYPES
 
+#ifndef __ASSEMBLER__
+
 #define NULL 0
 
 typedef char int8;
@@ -46,5 +48,7 @@ typedef unsigned long uintptr_t;
 #define bool int
 #define true 1
 #define false 0
+
+#endif
 
 #endif
