@@ -42,6 +42,10 @@
 #define VA_KERNEL_PMA_BEGIN VA_KERNEL_BEGIN
 #define VA_KERNEL_PMA_SIZE 0x2000000000
 
+// SV39 - 128GB Physical Memory Supported;
+// 4MB memory bitmap size;
+#define MEM_BITMAP_SIZE 4194304
+
 #elif VMEM_MODE == VMEM_MODE_SV48
 
 // SV48 - General;

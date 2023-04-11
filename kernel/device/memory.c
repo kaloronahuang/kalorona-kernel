@@ -99,10 +99,10 @@ static void device_walk_fdt_for_memory(struct fdt_header *fdt, int node_offset)
         device_walk_fdt_for_memory(fdt, subnode_offset);
 }
 
-void device_memory_init(struct fdt_header *fdt)
+void device_memory_init()
 {
     __sort_seg_num = 0;
-    device_walk_fdt_for_memory(fdt, 0);
+    device_walk_fdt_for_memory(flatten_device_tree, 0);
     printf("[device_memory]ram ranges from %p to %p\n", ram_descriptor.ram.pa_begin, ram_descriptor.ram.pa_begin + ram_descriptor.ram.pa_len - 1);
     device_calc_available_ram();
     printf("[device_memory]available memory segments:\n");

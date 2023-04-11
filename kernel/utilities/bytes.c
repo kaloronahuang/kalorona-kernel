@@ -32,3 +32,22 @@ uint64 flip_bytes_64(uint64 x)
     flip_bytes_inplace(&x, 8);
     return x;
 }
+
+int test_and_set_bit(uint8 *map, ulong index)
+{
+    int ret = ((map[index >> 3] >> (index & 0x7)) & 1);
+    map[index >> 3] |= (1 << (index & 0x7));
+    return ret;
+}
+
+int test_and_clear_bit(uint8 *map, ulong index)
+{
+    int ret = ((map[index >> 3] >> (index & 0x7)) & 1);
+    map[index >> 3] &= (~(((uint8)1) << (index & 0x7)));
+    return ret;
+}
+
+int test_bit(uint8 *map, ulong index)
+{
+    return ((map[index >> 3] >> (index & 0x7)) & 1);
+}

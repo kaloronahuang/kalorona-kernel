@@ -28,7 +28,7 @@ void device_discover(void)
 }
 
 // Initialize fdt and return a new fdt address;
-static struct fdt_header *device_fdt_init(struct fdt_header *fdt)
+struct fdt_header *device_fdt_init(struct fdt_header *fdt)
 {
     printf("[device]flattened device tree detected\n");
     // check and brief the device tree;
@@ -40,7 +40,7 @@ static struct fdt_header *device_fdt_init(struct fdt_header *fdt)
     // copy it to the kernel memory;
     printf("[device]copying fdt to kernel, new addr: %p\n", fdt_blob);
     if ((uint32)(fdt_totalsize(fdt)) < sizeof(fdt_blob))
-        memcpy(fdt_blob, fdt, (uint32)(fdt_totalsize(fdt)));
+        memmove(fdt_blob, fdt, (uint32)(fdt_totalsize(fdt)));
     else
         panic("device_init_by_fdt insufficient space for fdt");
     fdt = (struct fdt_header *)fdt_blob;
@@ -50,6 +50,4 @@ static struct fdt_header *device_fdt_init(struct fdt_header *fdt)
 // Initialize the device manager and the memory;
 void device_init(void)
 {
-    flatten_device_tree = device_fdt_init(flatten_device_tree);
-    device_memory_init(flatten_device_tree);
 }

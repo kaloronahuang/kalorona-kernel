@@ -21,6 +21,6 @@ struct ram_descriptor_struct
 
 extern struct ram_descriptor_struct ram_descriptor;
 
-void device_memory_init(struct fdt_header *fdt);
+void device_memory_init(void);
 
 #endif

@@ -14,6 +14,7 @@
 #include <vmem.h>
 #include <kimage_defs.h>
 #include <device.h>
+#include <device/memory.h>
 #include <signal.h>
 
 __attribute__((aligned(4096))) char vkernel_stack[VKERNEL_STACK_SIZE * MAX_CPU];
@@ -64,11 +65,17 @@ void kernel_main(int argc, char *const argv[])
         printf("[kernel]- \"%s\"\n", vboot_cmd.argv + j);
         j += strlen(vboot_cmd.argv + j) + 1;
     }
-    device_init();
-    kmem_init();
-    vm_kernel_init();
-    vm_hart_enable();
-    printf("[kernel]vkernel pagetable installed\n");
-    proc_init();
+    // load the fdt;
+    device_fdt_init(flatten_device_tree);
+    // init memory and setup bootmem;
+    device_memory_init();
+    bootmem_init();
+    // setup the kmem;
+    // setup new vmem structure;
+    // construct user mode;
+    // filesystem;
+    // load drivers;
+    // scheduler;
+    // debug use;
     sbi_srst_system_reset(0, 0);
 }
