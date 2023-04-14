@@ -21,6 +21,10 @@ struct bootmem_node_struct
     size_t num_ppn;
     uint8 *mem_map;
     size_t mem_map_size;
+    // the last page that is used in allocation;
+    ulong last_page;
+    // the first available offset in the last page;
+    ulong last_page_offset;
     // no need for spinlock to preserve the concurrency;
     // single core mode during bootmem mode;
 };
