@@ -1,9 +1,9 @@
 // bytes.h
-#include <types.h>
-
 #ifndef UTILITIES_BYTES
 
 #define UTILITIES_BYTES
+
+#include <types.h>
 
 void flip_bytes_inplace(void *x, size_t numOfBytes);
 

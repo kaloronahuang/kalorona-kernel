@@ -1,4 +1,8 @@
 // kmem.h
+#ifndef KMEM
+
+#define KMEM
+
 #include <asm/spriv.h>
 #include <asm/scsr.h>
 #include <types.h>
@@ -6,10 +10,7 @@
 #include <vmem.h>
 #include <utilities/algorithm.h>
 #include <bootmem.h>
-
-#ifndef KMEM
-
-#define KMEM
+#include <lock.h>
 
 #define AREA_ORDER 11
 #define AREA_BLOCK_SIZE (1ul << (AREA_ORDER - 1 + PAGE_OFFSET_WIDTH))

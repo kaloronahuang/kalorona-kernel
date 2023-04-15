@@ -1,9 +1,9 @@
 // lock.h
-#include <types.h>
-
 #ifndef LOCK
 
 #define LOCK
+
+#include <types.h>
 
 struct spinlock
 {

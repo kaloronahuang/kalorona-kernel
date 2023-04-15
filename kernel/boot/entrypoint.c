@@ -5,7 +5,6 @@
 #include <types.h>
 #include <parameters.h>
 #include <boot.h>
-#include <vmem.h>
 
 __attribute__((aligned(16))) __attribute__((section(".boot.bss"))) char init_stack[4096];
 

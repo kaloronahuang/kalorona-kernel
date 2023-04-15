@@ -1,12 +1,12 @@
 // proc.h
+#ifndef PROC
+
+#define PROC
+
 #include <types.h>
 #include <parameters.h>
 #include <lock.h>
 #include <vmem.h>
-
-#ifndef PROC
-
-#define PROC
 
 struct context_struct
 {

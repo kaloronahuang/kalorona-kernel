@@ -1,10 +1,10 @@
 // sbi.h
+#ifndef ASM_SBI
+
+#define ASM_SBI
+
 #include <types.h>
 #include <parameters.h>
-
-#ifndef ARCH_RISCV_SBI
-
-#define ARCH_RISCV_SBI
 
 // ECall Error Code Definitions;
 #define SBI_SUCCESS 0

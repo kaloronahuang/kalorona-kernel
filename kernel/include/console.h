@@ -1,10 +1,10 @@
 // console.h
-#include <types.h>
-#include <lock.h>
-
 #ifndef CONSOLE
 
 #define CONSOLE
+
+#include <types.h>
+#include <lock.h>
 
 struct console_lock_struct
 {

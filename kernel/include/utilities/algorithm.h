@@ -1,9 +1,9 @@
 // algorithm.h
 #include <types.h>
 
-#ifndef ALGORITHM
+#ifndef UTILITIES_ALGORITHM
 
-#define ALGORITHM
+#define UTILITIES_ALGORITHM
 
 // Quick Sort;
 

@@ -1,10 +1,10 @@
 // string.h
-#include <types.h>
-#include <parameters.h>
-
 #ifndef UTILITIES_STRING
 
 #define UTILITIES_STRING
+
+#include <types.h>
+#include <parameters.h>
 
 void *memset(void *dst, int val, size_t siz);
 

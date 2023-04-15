@@ -1,9 +1,9 @@
 // scsr.h
+#ifndef ASM_SCSR
+
+#define ASM_SCSR
+
 #include <types.h>
-
-#ifndef SCSR
-
-#define SCSR
 
 // CSR Header;
 // r_* - Read CSR;

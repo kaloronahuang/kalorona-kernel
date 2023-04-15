@@ -1,9 +1,9 @@
 // bootmem.h
-#include <types.h>
-
 #ifndef BOOTMEM
 
 #define BOOTMEM
+
+#include <types.h>
 
 // Page definitions;
 #define PAGE_SIZE 0x1000ULL

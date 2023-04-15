@@ -1,25 +1,25 @@
 
 OBJS = \
+	asm/sbi.o \
 	boot/entry.o \
 	boot/entrypoint.o \
 	boot/setup_mmu.o \
-	asm/sbi.o \
+	console/print.o \
+	device/memory.o \
 	utilities/algorithm/qsort.o \
 	utilities/string.o \
 	utilities/bytes.o \
-	console/print.o \
-	device/memory.o \
 	proc/hart.o \
 	proc/proc.o \
 	proc/trap_handler.o \
 	proc/trap.o \
 	kimage_defs.o \
+	bootmem.o \
 	device.o \
 	spinlock.o \
 	signal.o \
 	vkernel_entry.o \
 	kmem.o \
-	vmem.o \
 	main.o
 
 INCLUDE_DIR = include/

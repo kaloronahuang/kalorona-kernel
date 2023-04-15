@@ -1,9 +1,9 @@
 // registers.h
 #include <types.h>
 
-#ifndef REGISTERS
+#ifndef ASM_REGISTERS
 
-#define REGISTERS
+#define ASM_REGISTERS
 
 static uint64 r_tp()
 {
