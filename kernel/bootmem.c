@@ -42,6 +42,12 @@ static void bootmem_free_available_segments()
                      ram_descriptor.available_ram_segments[i].pa_len);
 }
 
+static void bootmem_test(void)
+{
+    printf("[bootmem_test]running test\n");
+
+}
+
 void bootmem_init(void)
 {
     printf("[bootmem]setting up the bootmem on UMA machine\n");
@@ -51,6 +57,8 @@ void bootmem_init(void)
     bootmem_free_available_segments();
     // mark the mem_map area reserved;
     bootmem_reserve(PMA_VA2PA(uma_node.mem_map), uma_node.mem_map_size);
+    // debugging test;
+    bootmem_test();
 }
 
 void bootmem_reserve(ulong paddr, size_t size)
@@ -89,7 +97,7 @@ void *bootmem_alloc(size_t size, ulong alignment, ulong goal)
     // added the base;
     preferred += ppn_offset;
 
-    size_t area_size = (size + PAGE_SIZE - 1) / PAGE_SIZE;
+    size_t area_size = (size + PAGE_SIZE - 1) >> PAGE_SHIFT;
     ulong step = alignment >> PAGE_SHIFT;
     if (step == 0)
         step = 1;
@@ -133,7 +141,7 @@ void *bootmem_alloc(size_t size, ulong alignment, ulong goal)
         {
             // no need for toggling up the bits;
             area_size = 0;
-            ret_addr = uma_node.last_page_offset + ((uma_node.last_page + uma_node.begin_ppn) << PAGE_SHIFT);
+            ret_addr = offset + ((uma_node.last_page + uma_node.begin_ppn) << PAGE_SHIFT);
             ret_addr = PMA_PA2VA(ret_addr);
             uma_node.last_page_offset = offset + size;
         }
@@ -141,20 +149,20 @@ void *bootmem_alloc(size_t size, ulong alignment, ulong goal)
         else
         {
             size_t back_size = size - rem_size;
-            area_size = (back_size + PAGE_SIZE - 1) / PAGE_SIZE;
-            ret_addr = uma_node.last_page_offset + ((uma_node.last_page + uma_node.begin_ppn) << PAGE_SHIFT);
+            area_size = (back_size + PAGE_SIZE - 1) >> PAGE_SHIFT;
+            ret_addr = offset + ((uma_node.last_page + uma_node.begin_ppn) << PAGE_SHIFT);
             ret_addr = PMA_PA2VA(ret_addr);
             uma_node.last_page = spot + area_size - 1;
             uma_node.last_page_offset = back_size;
         }
-        uma_node.last_page_offset &= (~(PAGE_SIZE - 1));
+        uma_node.last_page_offset &= (PAGE_SIZE - 1);
     }
     else
     {
         ret_addr =  ((spot + uma_node.begin_ppn) << PAGE_SHIFT);
         ret_addr = PMA_PA2VA(ret_addr);
         uma_node.last_page = spot + area_size - 1;
-        uma_node.last_page_offset = (size & (~(PAGE_SIZE - 1)));
+        uma_node.last_page_offset = (size & (PAGE_SIZE - 1));
     }
     for (ulong i = spot; i != spot + area_size; i++)
         if (test_and_set_bit(uma_node.mem_map, i))
