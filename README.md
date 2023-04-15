@@ -73,3 +73,4 @@ A TCP port will be exposed for GDB debugging. It is typically 25501. The `.gdbin
 ## References
 
 - xv6, a simple Unix-like teaching operating system, MIT PDOS, https://github.com/mit-pdos/xv6-riscv
+- M. Gorman, Understanding the linux virtual memory manager. Upper Saddle River: Prentice Hall PTR, 2004.
