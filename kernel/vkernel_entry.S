@@ -5,8 +5,6 @@
 
 .section .text
 
-.equ vks, VKERNEL_STACK_SIZE
-
 .global __vkernel_entry
 __vkernel_entry:
     # tp configured;

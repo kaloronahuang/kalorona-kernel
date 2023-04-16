@@ -20,10 +20,10 @@ qsort_def(int16);
 qsort_def(int32);
 qsort_def(int64);
 
-struct list
+struct list_node
 {
-    struct list *prv;
-    struct list *nxt;
+    struct list_node *prv;
+    struct list_node *nxt;
 };
 
 #endif

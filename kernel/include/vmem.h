@@ -81,11 +81,11 @@
 
 // PTE;
 
-#define PTE_FLAG_V (1ULL << 0)
-#define PTE_FLAG_R (1ULL << 1)
-#define PTE_FLAG_W (1ULL << 2)
-#define PTE_FLAG_X (1ULL << 3)
-#define PTE_FLAG_U (1ULL << 4)
+#define PTE_FLAG_V (1ul << 0)
+#define PTE_FLAG_R (1ul << 1)
+#define PTE_FLAG_W (1ul << 2)
+#define PTE_FLAG_X (1ul << 3)
+#define PTE_FLAG_U (1ul << 4)
 
 #define PTE_FLAGS_WIDTH 10
 #define PAGE_OFFSET_WIDTH 12

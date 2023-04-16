@@ -25,7 +25,7 @@ static void device_calc_available_ram()
     }
     // boundary;
     __sort_seg_begin[__sort_seg_num] = (ram_descriptor.ram.pa_begin + ram_descriptor.ram.pa_len) & (~(PAGE_SIZE - 1));
-    __sort_seg_end[__sort_seg_num] = -1ull;
+    __sort_seg_end[__sort_seg_num] = -1ul;
     __sort_seg_num++;
     // sort;
     qsort_uint64(__sort_seg_begin, __sort_seg_num);

@@ -6,7 +6,7 @@
 #include <types.h>
 
 // Page definitions;
-#define PAGE_SIZE 0x1000ULL
+#define PAGE_SIZE 0x1000ul
 #define PAGE_SHIFT 12
 
 #define BINARY_ROUND_UP(x, agn) (((x) + (agn) - 1) & (~(agn - 1)))

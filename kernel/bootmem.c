@@ -42,12 +42,6 @@ static void bootmem_free_available_segments()
                      ram_descriptor.available_ram_segments[i].pa_len);
 }
 
-static void bootmem_test(void)
-{
-    printf("[bootmem_test]running test\n");
-
-}
-
 void bootmem_init(void)
 {
     printf("[bootmem]setting up the bootmem on UMA machine\n");

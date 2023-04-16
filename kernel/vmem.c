@@ -126,7 +126,7 @@ void vm_unmappages(pagetable_t pgtbl, uint64 va, size_t page_count, int do_free)
     for (uint64 v_addr = va; v_addr < bound; v_addr += PAGE_SIZE)
     {
         pte_t *entry = vm_walk(pgtbl, v_addr, 0);
-        if (entry == NULL || (*entry & PTE_FLAG_V) == 0 || (*entry & ((1ull << PTE_FLAGS_WIDTH) - 1)) == PTE_FLAG_V)
+        if (entry == NULL || (*entry & PTE_FLAG_V) == 0 || (*entry & ((1ul << PTE_FLAGS_WIDTH) - 1)) == PTE_FLAG_V)
             panic("vm_unmappages - broken entry");
         if (do_free)
             kmem_free((void *)PMA_PA2VA(PTE_PA(*entry)));

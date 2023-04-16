@@ -12,54 +12,29 @@
 #include <bootmem.h>
 #include <lock.h>
 
-#define AREA_ORDER 11
-#define AREA_BLOCK_SIZE (1ul << (AREA_ORDER - 1 + PAGE_OFFSET_WIDTH))
-#define LOWBIT(x) ((-(x)) & (x))
+#define MAX_MEM_ORDER 11
 
-// object:
-// (struct kmem_free_object) header
-// ...content...
-// size_t size;
-struct kmem_free_object
+struct kmem_free_area_struct
 {
-    struct kmem_free_object *fa_node;
-    struct kmem_free_object *ch_nodes[2];
-    size_t object_size;
+    struct list_node free_page_list;
+    uint8 *free_area_map;
+    size_t free_area_map_size;
 };
 
-// object page chain;
-struct kmem_object_page
+struct kmem_node_struct
 {
-    void *page_vaddr;
-    struct kmem_object_page *prv;
-    struct kmem_object_page *nxt;
-};
-
-// continuous pages;
-struct kmem_free_area
-{
-    // size keyworded;
-    struct kmem_free_area *size_fa_node;
-    struct kmem_free_area *size_ch_nodes[2];
-
-    // address keyworded;
-    struct kmem_free_area *addr_fa_node;
-    struct kmem_free_area *addr_ch_nodes[2];
-
-    size_t area_size;
-};
-
-struct kmem_struct
-{
+    // multi hart core may use the lock;
     struct spinlock lock;
-    struct kmem_free_area *size_root_area;
-    struct kmem_free_area *addr_root_area;
-
-    struct kmem_free_object *free_object_root;
-    struct kmem_object_page *object_pagelist;
+    // info;
+    ulong begin_ppn;
+    size_t num_ppn;
+    uint8 *mem_map;
+    size_t mem_map_size;
+    // for the low level API;
+    struct kmem_free_area_struct free_areas[MAX_MEM_ORDER];
 };
 
-extern struct kmem_struct kmem;
+extern struct kmem_node_struct kmem;
 
 void kmem_init(void);
 
