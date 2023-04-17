@@ -51,8 +51,6 @@ void bootmem_init(void)
     bootmem_free_available_segments();
     // mark the mem_map area reserved;
     bootmem_reserve(PMA_VA2PA(uma_node.mem_map), uma_node.mem_map_size);
-    // debugging test;
-    bootmem_test();
 }
 
 void bootmem_reserve(ulong paddr, size_t size)

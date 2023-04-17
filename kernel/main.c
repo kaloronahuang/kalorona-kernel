@@ -72,6 +72,7 @@ void kernel_main(int argc, char *const argv[])
     device_memory_init();
     bootmem_init();
     // setup the kmem;
+    kmem_init();
     // retire the bootmem;
     // setup new vmem structure;
     // construct user mode;

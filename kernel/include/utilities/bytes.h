@@ -14,5 +14,6 @@ uint64 flip_bytes_64(uint64 x);
 int test_and_set_bit(uint8 *map, ulong index);
 int test_and_clear_bit(uint8 *map, ulong index);
 int test_bit(uint8 *map, ulong index);
+int toggle_bit(uint8 *map, ulong index);
 
 #endif

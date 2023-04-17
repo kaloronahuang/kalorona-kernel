@@ -7,8 +7,10 @@ OBJS = \
 	console/print.o \
 	device/memory.o \
 	utilities/algorithm/qsort.o \
+	utilities/algorithm/list.o \
 	utilities/string.o \
 	utilities/bytes.o \
+	kmem/buddy.o \
 	proc/hart.o \
 	proc/proc.o \
 	proc/trap_handler.o \

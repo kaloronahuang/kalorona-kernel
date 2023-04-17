@@ -25,6 +25,7 @@ struct kmem_node_struct
 {
     // multi hart core may use the lock;
     struct spinlock lock;
+    bool lock_installed;
     // info;
     ulong begin_ppn;
     size_t num_ppn;
@@ -39,7 +40,9 @@ extern struct kmem_node_struct kmem;
 void kmem_init(void);
 
 // low level API for allocating pages;
-void *kmem_alloc_pages(size_t page_count);
+void kmem_page_manager_init(void);
+void *kmem_alloc_pages(ulong order);
+void kmem_free_page(void *addr);
 void kmem_free_pages(void *addr, size_t page_count);
 
 // high level API;

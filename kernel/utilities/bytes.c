@@ -51,3 +51,9 @@ int test_bit(uint8 *map, ulong index)
 {
     return ((map[index >> 3] >> (index & 0x7)) & 1);
 }
+
+int toggle_bit(uint8 *map, ulong index)
+{
+    map[index >> 3] ^= (1 << (index & 0x7));
+    return ((map[index >> 3] >> (index & 0x7)) & 1);
+}

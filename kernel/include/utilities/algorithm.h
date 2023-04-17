@@ -1,9 +1,9 @@
 // algorithm.h
-#include <types.h>
-
 #ifndef UTILITIES_ALGORITHM
 
 #define UTILITIES_ALGORITHM
+
+#include <types.h>
 
 // Quick Sort;
 
@@ -20,10 +20,15 @@ qsort_def(int16);
 qsort_def(int32);
 qsort_def(int64);
 
+// Linked List;
+
 struct list_node
 {
     struct list_node *prv;
     struct list_node *nxt;
 };
+
+void list_insert(struct list_node *head, struct list_node *node);
+void list_detach(struct list_node *node);
 
 #endif
