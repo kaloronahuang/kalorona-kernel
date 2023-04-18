@@ -10,6 +10,7 @@ OBJS = \
 	memory/buddy.o \
 	memory/bootmem.o \
 	memory/kmem.o \
+	memory/object.o \
 	proc/hart.o \
 	proc/proc.o \
 	proc/trap_handler.o \

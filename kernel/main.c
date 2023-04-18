@@ -16,7 +16,6 @@
 #include <device.h>
 #include <device/memory.h>
 #include <signal.h>
-#include <bootmem.h>
 
 __attribute__((aligned(4096))) char vkernel_stack[VKERNEL_STACK_SIZE * MAX_CPU];
 

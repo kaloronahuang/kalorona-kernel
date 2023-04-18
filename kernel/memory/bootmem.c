@@ -1,5 +1,5 @@
 // bootmem.c
-#include <bootmem.h>
+#include <kmem.h>
 #include <device/memory.h>
 #include <utilities/bytes.h>
 #include <vmem.h>

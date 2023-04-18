@@ -12,6 +12,16 @@
 
 struct kmem_node_struct kmem;
 
+void *kmem_alloc(size_t size)
+{
+
+}
+
+void kmem_free(void *addr)
+{
+
+}
+
 void kmem_init(void)
 {
     // init the kmem info;
@@ -23,7 +33,6 @@ void kmem_init(void)
     kmem.mem_map_size = uma_node.mem_map_size;
     // init buddy;
     kmem_page_manager_init();
-    // make the kmem locked;
-    spinlock_init(&kmem.lock, "kmem.lock");
-    kmem.lock_installed = true;
+    // init object management;
+    kmem_object_init();
 }

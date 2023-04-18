@@ -12,6 +12,7 @@
 void kmem_page_manager_init(void)
 {
     printf("[kmem_page_manager]initializing\n");
+    spinlock_init(&kmem.page_manager_lock, "page_manager_lock");
     for (int ord = 0; ord < MAX_MEM_ORDER; ord++)
     {
         kmem.free_areas[ord].free_area_map_size = ((kmem.num_ppn >> (ord + 1)) + 8 - 1) >> 3;
@@ -26,49 +27,50 @@ void kmem_page_manager_init(void)
         }
 }
 
-// low level API for allocating pages;
-static void *kmem_expand_block(void *page_vaddr, ulong current_order, ulong target_order)
-{
-    if (current_order < target_order)
-        panic("kmem_expand_block - wrong direction");
-    for (ulong ord = current_order; ord > target_order; ord--)
-    {
-        ulong block_vaddr = (ulong)page_vaddr;
-        ulong block_pn = (PMA_VA2PA(block_vaddr) >> PAGE_SHIFT) - kmem.begin_ppn;
-
-        ulong left_part = block_vaddr;
-        ulong right_part = block_vaddr + ((1ul << (ord - 1)) << PAGE_SHIFT);
-
-        // remove the large block;
-        list_detach((struct list_node *)left_part);
-        toggle_bit(kmem.free_areas[ord].free_area_map, block_pn >> (ord + 1));
-
-        // left part splitted;
-        list_insert(&kmem.free_areas[ord - 1].free_page_list, (struct list_node *)left_part);
-        // right part splitted;
-        list_insert(&kmem.free_areas[ord - 1].free_page_list, (struct list_node *)right_part);
-    }
-    // register;
-    ulong page_pn = (PMA_VA2PA(page_vaddr) >> PAGE_SHIFT) - kmem.begin_ppn;
-    list_detach((struct list_node *)page_vaddr);
-    toggle_bit(kmem.free_areas[target_order].free_area_map, page_pn >> (target_order + 1));
-
-    return page_vaddr;
-}
-
 void *kmem_alloc_pages(ulong order)
 {
     if (order >= MAX_MEM_ORDER)
         panic("kmem_alloc_pages - too large");
     ulong current_order = order;
+    spinlock_acquire(&kmem.page_manager_lock);
+    void *ret = NULL;
     while (current_order < MAX_MEM_ORDER)
         if (kmem.free_areas[current_order].free_page_list.nxt != NULL)
+        {
             // got a huge page of size 2^current_order;
-            return kmem_expand_block(kmem.free_areas[current_order].free_page_list.nxt, current_order, order);
+            // return kmem_expand_block(kmem.free_areas[current_order].free_page_list.nxt, current_order, order);
+            if (current_order < order)
+                panic("kmem_alloc_pages - wrong direction");
+            ulong page_vaddr = (ulong)(kmem.free_areas[current_order].free_page_list.nxt);
+            for (ulong ord = current_order; ord > order; ord--)
+            {
+                ulong block_vaddr = page_vaddr;
+                ulong block_pn = (PMA_VA2PA(block_vaddr) >> PAGE_SHIFT) - kmem.begin_ppn;
+
+                ulong left_part = block_vaddr;
+                ulong right_part = block_vaddr + ((1ul << (ord - 1)) << PAGE_SHIFT);
+
+                // remove the large block;
+                list_detach((struct list_node *)left_part);
+                toggle_bit(kmem.free_areas[ord].free_area_map, block_pn >> (ord + 1));
+
+                // left part splitted;
+                list_insert(&kmem.free_areas[ord - 1].free_page_list, (struct list_node *)left_part);
+                // right part splitted;
+                list_insert(&kmem.free_areas[ord - 1].free_page_list, (struct list_node *)right_part);
+            }
+            // register;
+            ulong page_pn = (PMA_VA2PA(page_vaddr) >> PAGE_SHIFT) - kmem.begin_ppn;
+            list_detach((struct list_node *)page_vaddr);
+            toggle_bit(kmem.free_areas[order].free_area_map, page_pn >> (order + 1));
+
+            ret = (void *)page_vaddr;
+            break;
+        }
         else
             current_order++;
-    // no available continuous pages;
-    return NULL;
+    spinlock_release(&kmem.page_manager_lock);
+    return ret;
 }
 
 void kmem_free_page(void *addr)
@@ -76,8 +78,7 @@ void kmem_free_page(void *addr)
     if ((ulong)addr & (PAGE_SIZE - 1))
         panic("kmem_free_page - bad address alignment");
     ulong pn = (PMA_VA2PA(addr) >> PAGE_SHIFT) - kmem.begin_ppn;
-    if (kmem.lock_installed)
-        spinlock_acquire(&kmem.lock);
+    spinlock_acquire(&kmem.page_manager_lock);
     if (!test_and_clear_bit(kmem.mem_map, pn))
         panic("kmem_free_page - freed twice");
     for (int dep = 0; dep < MAX_MEM_ORDER; dep++)
@@ -103,8 +104,7 @@ void kmem_free_page(void *addr)
             break;
         }
     }
-    if (kmem.lock_installed)
-        spinlock_release(&kmem.lock);
+    spinlock_release(&kmem.page_manager_lock);
 }
 
 void kmem_free_pages(void *addr, size_t page_count)
