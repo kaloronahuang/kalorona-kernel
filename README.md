@@ -6,15 +6,31 @@ A toy kernel on RISC-V platform.
 
 ### Implemented
 
-- Paging & Virtual Memory
-- Load the kernel at kernel address space
-- Memory Discovery & Pages Management: Allocating valid pages(not reserved)
+| Module                                   | Description                                                  |
+| ---------------------------------------- | ------------------------------------------------------------ |
+| **Kernel Loader - `boot`**               |                                                              |
+| Setting up MMU                           | Making temporary page-tables for kernel address space, and jumping to kernel at virtual address space. |
+| **Console - `console`**                  | Printing info to UART device, currently through legacy SBI extension. |
+| **Device - `device`**                    |                                                              |
+| Loading Flatten Device Tree(FDT)         | Using `libfdt` to read info from the FDT given by bootloader. |
+| Detecting System Memory                  | FDT conatins the info of physical memory space(reservation, availablity). |
+| **Memory Management - `memory`**         |                                                              |
+| Memory Management for Boot Time          | Implemented `bootmem` for early stage memory allocation.     |
+| Continuous Page Allocation               | Page allocation akin to Buddy.                               |
+| Object Allocation                        | Introducing lightweight object allocator.                    |
+| **System Functionalities**               |                                                              |
+| Spinlock                                 |                                                              |
+| Utilities for Kernel Code - `utilities/` | Including operations such as bit operations, linked list, sorting algorithms and string/memory related functions. |
+
+### Ongoing
+
+- User Space
 
 ### Planned
 
 - Virtio Driver for I/O
 - Device Discovery
-- User Space
+- OS-level virtualization(containerization)
 
 ## Build
 
