@@ -5,23 +5,23 @@ OBJS = \
 	boot/entrypoint.o \
 	boot/setup_mmu.o \
 	console/print.o \
+	device/device.o \
 	device/memory.o \
-	utilities/algorithm/qsort.o \
-	utilities/algorithm/list.o \
-	utilities/string.o \
-	utilities/bytes.o \
-	kmem/buddy.o \
+	memory/buddy.o \
+	memory/bootmem.o \
+	memory/kmem.o \
 	proc/hart.o \
 	proc/proc.o \
 	proc/trap_handler.o \
 	proc/trap.o \
+	utilities/algorithm/qsort.o \
+	utilities/algorithm/list.o \
+	utilities/string.o \
+	utilities/bytes.o \
 	kimage_defs.o \
-	bootmem.o \
-	device.o \
 	spinlock.o \
 	signal.o \
 	vkernel_entry.o \
-	kmem.o \
 	main.o
 
 INCLUDE_DIR = include/
