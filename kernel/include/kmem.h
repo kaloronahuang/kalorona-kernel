@@ -23,7 +23,7 @@
 
 #define MAX_MEM_ORDER 11
 
-#define MAX_KMEM_OBJECT_BLOCK_NAME_LEN 16
+#define KMEM_OBJECT_BLOCK_NAME_MAXLEN 16
 #define OBJECT_ALIGNMENT 0x8
 
 // bootmem;
@@ -85,7 +85,7 @@ struct kmem_object_block_struct
 
 struct kmem_object_manager_struct
 {
-    char block_name[MAX_KMEM_OBJECT_BLOCK_NAME_LEN];
+    char block_name[KMEM_OBJECT_BLOCK_NAME_MAXLEN];
     size_t object_size;
     struct kmem_object_block_struct *blocks;
     struct kmem_object_manager_struct *nxt;
