@@ -30,7 +30,7 @@ static void bootmem_init_uma_node()
     // mem_map size;
     uma_node.mem_map_size = ((uma_node.num_ppn + 0x7) >> 3);
     // binding the mem_map at the beginning of the memory;
-    uma_node.mem_map = PMA_PA2VA(uma_node.begin_ppn << PAGE_SHIFT);
+    uma_node.mem_map = (uint8 *)PMA_PA2VA(uma_node.begin_ppn << PAGE_SHIFT);
     // set all to reserved;
     memset(uma_node.mem_map, 0xff, sizeof(uint8) * uma_node.mem_map_size);
 }

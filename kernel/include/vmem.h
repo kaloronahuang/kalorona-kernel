@@ -102,8 +102,8 @@
 #include <kmem.h>
 #include <parameters.h>
 
-#define PMA_VA2PA(va) (((uint64)(va)) & (~VA_KERNEL_BEGIN))
-#define PMA_PA2VA(pa) (((uint64)(pa)) | VA_KERNEL_BEGIN)
+#define PMA_VA2PA(va) (((ulong)(va)) & (~VA_KERNEL_BEGIN))
+#define PMA_PA2VA(pa) (((ulong)(pa)) | VA_KERNEL_BEGIN)
 
 typedef uint64 pte_t;
 typedef uint64 *pagetable_t;

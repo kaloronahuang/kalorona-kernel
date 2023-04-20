@@ -68,27 +68,44 @@ void kmem_free_pages(void *addr, size_t page_count);
 
 // kmem object management;
 
+struct kmem_object_header_struct
+{
+    struct kmem_object_block_struct *parent_block;
+    struct kmem_object_header_struct *prv;
+    struct kmem_object_header_struct *nxt;
+};
+
 struct kmem_object_block_struct
 {
-    // at 0;
-    struct list_node free_slots;
-    // at sizeof(struct list_node);
-    struct list_node allocated_slots;
+    /* Protected by Parent Manager Lock - Begin */
+    struct kmem_object_header_struct free_slots;
+    struct kmem_object_header_struct allocated_slots;
+    struct kmem_object_block_struct *nxt;
+    /* Protected by Parent Manager Lock - End */
+
     // stat;
     size_t used;
     size_t total;
     size_t object_size;
     size_t page_count;
-    // next block;
-    struct kmem_object_block_struct *nxt;
+
+    // parent manager;
+    struct kmem_object_manager_struct *parent_manager;
 };
+
+void kmem_object_header_detach(struct kmem_object_header_struct *node);
+void kmem_object_header_insert(struct kmem_object_header_struct *head, struct kmem_object_header_struct *node);
 
 struct kmem_object_manager_struct
 {
     char block_name[KMEM_OBJECT_BLOCK_NAME_MAXLEN];
     size_t object_size;
+
+    struct spinlock lock;
+    /* Protected by Lock - Begin */
     struct kmem_object_block_struct *blocks;
     struct kmem_object_manager_struct *nxt;
+    /* Protected by Lock - End */
 };
 
 void *kmem_alloc(size_t size);
@@ -98,7 +115,7 @@ void *kmem_object_alloc(struct kmem_object_manager_struct *mgr);
 void kmem_object_free(void *vaddr);
 
 void kmem_object_free_block(struct kmem_object_block_struct *block);
-struct kmem_object_block_struct *kmem_object_create_block(ulong page_order, size_t object_size);
+struct kmem_object_block_struct *kmem_object_create_block(struct kmem_object_manager_struct *parent_manager, ulong page_order, size_t object_size);
 
 struct kmem_object_manager_struct *kmem_object_create_manager(size_t object_size, const char *name);
 void kmem_object_init(void);
@@ -116,6 +133,7 @@ struct kmem_node_struct
     struct spinlock page_manager_lock;
     struct kmem_free_area_struct free_areas[MAX_MEM_ORDER];
     // object_manager;
+    // The lock is only responsible for adding object_manager;
     struct spinlock object_manager_lock;
     struct kmem_object_manager_struct object_manager;
 };

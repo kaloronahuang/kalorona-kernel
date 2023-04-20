@@ -1,5 +1,6 @@
 // list.c
 #include <utilities/algorithm.h>
+#include <signal.h>
 
 void list_insert(struct list_node *head, struct list_node *node)
 {

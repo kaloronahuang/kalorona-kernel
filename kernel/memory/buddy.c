@@ -23,7 +23,7 @@ void kmem_page_manager_init(void)
         if (!test_bit(kmem.mem_map, pn))
         {
             test_and_set_bit(kmem.mem_map, pn);
-            kmem_free_page(PMA_PA2VA((pn + kmem.begin_ppn) << PAGE_SHIFT));
+            kmem_free_page((void *)PMA_PA2VA((pn + kmem.begin_ppn) << PAGE_SHIFT));
         }
 }
 
