@@ -34,7 +34,7 @@ static ulong kmem_object_alloc_from_block(struct kmem_object_block_struct *blk)
     kmem_object_header_detach(node);
     kmem_object_header_insert(&(blk->allocated_slots), node);
     blk->used++;
-    return BINARY_ROUND_UP((ulong)node + sizeof(struct kmem_object_header_struct), OBJECT_ALIGNMENT);
+    return (ulong)node + sizeof(struct kmem_object_header_struct);
 }
 
 void *kmem_object_alloc(struct kmem_object_manager_struct *mgr)
@@ -152,6 +152,7 @@ struct kmem_object_block_struct *kmem_object_create_block(struct kmem_object_man
         cur->nxt = NULL;
         cur->parent_block = block;
         block->total++;
+        previous = cur;
     }
 
     return block;
@@ -176,7 +177,7 @@ struct kmem_object_manager_struct *kmem_object_create_manager(size_t object_size
 void kmem_object_init(void)
 {
     printf("[kmem_object]initializing\n");
-    strcpy(kmem.object_manager.block_name, "kmem_object_manager");
+    strcpy(kmem.object_manager.block_name, "kmem_obj_mgr");
     kmem.object_manager.object_size = BINARY_ROUND_UP(sizeof(struct kmem_object_manager_struct), OBJECT_ALIGNMENT);
     spinlock_init(&kmem.object_manager_lock, "kmem_object_manager_lock");
 }
