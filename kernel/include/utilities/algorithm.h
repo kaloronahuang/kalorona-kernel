@@ -26,7 +26,10 @@ struct list_node
 {
     struct list_node *prv;
     struct list_node *nxt;
+    void *val;
 };
+
+#define list_access(node, typ) (##typ *)((node).val)
 
 void list_insert(struct list_node *head, struct list_node *node);
 void list_detach(struct list_node *node);
