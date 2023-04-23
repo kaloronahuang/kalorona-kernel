@@ -41,6 +41,7 @@ void *kmem_object_alloc(struct kmem_object_manager_struct *mgr)
 {
     bool allocated = false;
     ulong ret_vaddr = NULL;
+    size_t unit_size = mgr->object_size + sizeof(struct kmem_object_header_struct);
     size_t allocated_sum = 0;
     spinlock_acquire(&(mgr->lock));
     for (struct kmem_object_block_struct *blk = mgr->blocks; blk != NULL; blk = blk->nxt)
@@ -51,7 +52,9 @@ void *kmem_object_alloc(struct kmem_object_manager_struct *mgr)
             break;
         }
         else
-            allocated_sum += blk->used * (blk->object_size + sizeof(struct kmem_object_header_struct));
+            allocated_sum += blk->used * unit_size;
+    if (allocated_sum < unit_size * 4)
+        allocated_sum = unit_size * 4;
     if (!allocated)
     {
         // new block maybe;
@@ -59,7 +62,9 @@ void *kmem_object_alloc(struct kmem_object_manager_struct *mgr)
         while (nxt_ord + 1 < MAX_MEM_ORDER && BINARY_ROUND_DOWN((1ul << (nxt_ord + PAGE_SHIFT)) - sizeof(struct kmem_object_block_struct), OBJECT_ALIGNMENT) <= allocated_sum)
             nxt_ord++;
         struct kmem_object_block_struct *new_blk = NULL;
-        while ((new_blk = kmem_object_create_block(mgr, nxt_ord, mgr->object_size)) == NULL && nxt_ord > 0)
+        while (BINARY_ROUND_DOWN((1ul << (nxt_ord + PAGE_SHIFT)) - sizeof(struct kmem_object_block_struct), OBJECT_ALIGNMENT) >= unit_size &&
+               (new_blk = kmem_object_create_block(mgr, nxt_ord, mgr->object_size)) == NULL &&
+               nxt_ord > 0)
             nxt_ord--;
         if (new_blk == NULL)
             ret_vaddr = NULL;

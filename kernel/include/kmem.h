@@ -109,7 +109,7 @@ struct kmem_object_manager_struct
 };
 
 void *kmem_alloc(size_t size);
-void kmem_free(void *addr);
+void kmem_free(void *vaddr);
 
 void *kmem_object_alloc(struct kmem_object_manager_struct *mgr);
 void kmem_object_free(void *vaddr);
@@ -140,5 +140,9 @@ struct kmem_node_struct
 
 extern struct kmem_node_struct kmem;
 void kmem_init(void);
+
+// useful managers;
+
+extern struct kmem_object_manager_struct *list_node_object_manager;
 
 #endif
