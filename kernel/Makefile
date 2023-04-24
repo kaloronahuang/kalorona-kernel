@@ -11,6 +11,7 @@ OBJS = \
 	memory/bootmem.o \
 	memory/kmem.o \
 	memory/object.o \
+	memory/vmem.o \
 	proc/hart.o \
 	proc/proc.o \
 	proc/trap_handler.o \

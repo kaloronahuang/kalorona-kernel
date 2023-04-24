@@ -43,8 +43,6 @@
 #define VA_KERNEL_PMA_SIZE 0x2000000000
 
 // SV39 - 128GB Physical Memory Supported;
-// 4MB memory bitmap size;
-#define MEM_BITMAP_SIZE 4194304
 
 #elif VMEM_MODE == VMEM_MODE_SV48
 
@@ -92,9 +90,9 @@
 #define PN_WIDTH 9
 
 #define VA_GET_PN(lv, va) (((va) >> (PN_WIDTH * (lv) + PAGE_OFFSET_WIDTH)) & 0x1FF)
-#define PA_PTE(pa) ((((uint64)(pa)) >> PAGE_OFFSET_WIDTH) << PTE_FLAGS_WIDTH)
-#define PTE_PA(pte) ((((uint64)(pte)) >> PTE_FLAGS_WIDTH) << PAGE_OFFSET_WIDTH)
-#define SATP(mode, pgtbl) ((((uint64)mode) << VMEM_MODE_SHIFT) | (((uint64)pgtbl) >> PAGE_OFFSET_WIDTH))
+#define PA_PTE(pa) ((((ulong)(pa)) >> PAGE_OFFSET_WIDTH) << PTE_FLAGS_WIDTH)
+#define PTE_PA(pte) ((((ulong)(pte)) >> PTE_FLAGS_WIDTH) << PAGE_OFFSET_WIDTH)
+#define SATP(mode, pgtbl) ((((ulong)mode) << VMEM_MODE_SHIFT) | (((ulong)pgtbl) >> PAGE_OFFSET_WIDTH))
 
 #ifndef __ASSEMBLER__
 
@@ -105,21 +103,30 @@
 #define PMA_VA2PA(va) (((ulong)(va)) & (~VA_KERNEL_BEGIN))
 #define PMA_PA2VA(pa) (((ulong)(pa)) | VA_KERNEL_BEGIN)
 
-typedef uint64 pte_t;
-typedef uint64 *pagetable_t;
+typedef ulong pte_t;
+typedef ulong *pagetable_t;
 
-pte_t *vm_walk(pagetable_t pgtbl, uint64 va, int alloc);
-void vm_freewalk(pagetable_t pgtbl);
-int vm_mappages(pagetable_t pgtbl, uint64 va, uint64 pa, size_t siz, uint64 flags);
+// Utilities functions for VM;
+
+// query for physical addr;
+pte_t *vm_walk(pagetable_t pgtbl, ulong va, int alloc);
+int vm_mappages(pagetable_t pgtbl, ulong va, ulong pa, size_t siz, ulong flags);
+void vm_unmappages(pagetable_t pgtbl, ulong va, size_t page_count, int do_free);
+// entries have to be cleared before reaping pagetable;
+void vm_reap_pagetable(pagetable_t pgtbl);
+// destory the pagetable and its entries;
+void vm_reap_pagetable_force(pagetable_t pgtbl);
+
+// Kernel VM;
+
+extern pagetable_t kernel_pagetable;
+// vm_kernel_init translates the address through PMA;
+void vm_kernel_init(void);
 void vm_hart_enable(void);
 
-pagetable_t vm_kernel_make_pagetable(void);
-void vm_kernel_init(void);
+// User VM;
 
 pagetable_t vm_user_make_pagetable(void);
-uint64 vm_user_walk_addr(pagetable_t pgtbl, uint64 va);
-void vm_unmappages(pagetable_t pgtbl, uint64 va, size_t page_count, int do_free);
-void vm_user_free_pagetable(pagetable_t pgtbl);
 
 #endif
 
