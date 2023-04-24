@@ -13,11 +13,12 @@ __entry:
     # tp register has been written;
     # a0, a1 - argc, argv
     # Set the size of the stack;
-    li a2, 4096
+    li a2, 512
+    mul a2, a2, tp
+    addi a2, a2, 512
     # Set the stack pointer;
     la sp, init_stack
     # Stack pointer decreases gradually with the more data loaded into the stack;
     add sp, sp, a2
     # Go!
-    
     call kernel_entrypoint

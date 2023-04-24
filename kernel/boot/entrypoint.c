@@ -6,7 +6,7 @@
 #include <parameters.h>
 #include <boot.h>
 
-__attribute__((aligned(16))) __attribute__((section(".boot.bss"))) char init_stack[4096];
+__attribute__((aligned(16))) __attribute__((section(".boot.bss"))) char init_stack[MAX_CPU * 512];
 
 extern void setup_mmu(void);
 extern void (*vkernel_entry)(int, char *const *);

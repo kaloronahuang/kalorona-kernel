@@ -21,6 +21,8 @@ __attribute__((aligned(4096))) char vkernel_stack[VKERNEL_STACK_SIZE * MAX_CPU];
 
 struct boot_command vboot_cmd;
 
+static int started;
+
 void parse_boot_args()
 {
     /*
@@ -44,40 +46,44 @@ void parse_boot_args()
 
 void kernel_main(int argc, char *const argv[])
 {
-    // copy the arguments;
-    size_t argv_ptr = 0;
-    vboot_cmd.argc = argc;
-    for (int i = 0; i < argc; i++)
+    if (!started)
     {
-        size_t ptr = 0;
-        do
+        // copy the arguments;
+        size_t argv_ptr = 0;
+        vboot_cmd.argc = argc;
+        for (int i = 0; i < argc; i++)
         {
-            vboot_cmd.argv[argv_ptr++] = argv[i][ptr];
-        } while (argv[i][ptr++] != '\0');
+            size_t ptr = 0;
+            do
+            {
+                vboot_cmd.argv[argv_ptr++] = argv[i][ptr];
+            } while (argv[i][ptr++] != '\0');
+        }
+        parse_boot_args();
+        // initialize;
+        console_init();
+        printf("[kernel]vkernel running\n");
+        printf("[kernel]boot argc: %d\n", argc);
+        for (int i = 0, j = 0; i < vboot_cmd.argc; i++)
+        {
+            printf("[kernel]- \"%s\"\n", vboot_cmd.argv + j);
+            j += strlen(vboot_cmd.argv + j) + 1;
+        }
+        // load the fdt;
+        device_fdt_init(flatten_device_tree);
+        // init memory and setup bootmem;
+        device_memory_init();
+        bootmem_init();
+        // setup the kmem;
+        kmem_init();
+        // retire the bootmem;
+        // setup new vmem structure;
+        // construct user mode;
+        // filesystem;
+        // load drivers;
+        // multicore activating;
+        started = 1;
     }
-    parse_boot_args();
-    // initialize;
-    console_init();
-    printf("[kernel]vkernel running\n");
-    printf("[kernel]boot argc: %d\n", argc);
-    for (int i = 0, j = 0; i < vboot_cmd.argc; i++)
-    {
-        printf("[kernel]- \"%s\"\n", vboot_cmd.argv + j);
-        j += strlen(vboot_cmd.argv + j) + 1;
-    }
-    // load the fdt;
-    device_fdt_init(flatten_device_tree);
-    // init memory and setup bootmem;
-    device_memory_init();
-    bootmem_init();
-    // setup the kmem;
-    kmem_init();
-    // retire the bootmem;
-    // setup new vmem structure;
-    // construct user mode;
-    // filesystem;
-    // load drivers;
-    // scheduler;
-    // debug use;
+    // scheduling;
     sbi_srst_system_reset(0, 0);
 }
