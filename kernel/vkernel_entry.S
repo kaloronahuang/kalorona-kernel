@@ -18,6 +18,7 @@ __vkernel_entry:
     mv a3, tp
     addi a3, a3, 1
     mul a2, a2, a3
+    la sp, vkernel_stack
     add sp, sp, a2
     call kernel_main
 
