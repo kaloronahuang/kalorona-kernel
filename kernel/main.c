@@ -76,8 +76,8 @@ void kernel_main(int argc, char *const argv[])
         bootmem_init();
         // setup the kmem;
         kmem_init();
-        // retire the bootmem;
         // setup new vmem structure;
+        vm_kernel_init();
         // construct user mode;
         // filesystem;
         // load drivers;

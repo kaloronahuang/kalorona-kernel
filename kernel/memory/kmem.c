@@ -23,7 +23,7 @@ struct kmem_object_manager_struct *list_node_object_manager;
 
 void *kmem_alloc(size_t size)
 {
-    ulong ret_vaddr = NULL;
+    void *ret_vaddr = NULL;
     // umanager are sorted by size;
     for (struct list_node *mgr_node = uni_managers.nxt; mgr_node != NULL && ret_vaddr == NULL; mgr_node = mgr_node->nxt)
     {
@@ -31,7 +31,7 @@ void *kmem_alloc(size_t size)
         if (mgr->object_size >= size)
             ret_vaddr = kmem_object_alloc(mgr);
     }
-    return (void *)ret_vaddr;
+    return ret_vaddr;
 }
 
 void kmem_free(void *vaddr) { kmem_object_free(vaddr); }

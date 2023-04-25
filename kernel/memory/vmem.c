@@ -72,12 +72,12 @@ void vm_reap_pagetable(pagetable_t pgtbl)
         {
             // non-leaf;
             uint64 nxt = PMA_PA2VA(PTE_PA(pte));
-            vm_freewalk((pagetable_t)nxt);
+            vm_reap_pagetable((pagetable_t)nxt);
             pgtbl[i] = 0;
         }
         else if (pte & PTE_FLAG_V)
             // no binding pages are allowed;
-            panic("vm_freewalk - leaves");
+            panic("vm_reap_pagetable - leaves");
     }
     kmem_free_page(pgtbl);
 }
@@ -91,7 +91,7 @@ void vm_reap_pagetable_force(pagetable_t pgtbl)
         {
             // non-leaf;
             uint64 nxt = PMA_PA2VA(PTE_PA(pte));
-            vm_freewalk((pagetable_t)nxt);
+            vm_reap_pagetable_force((pagetable_t)nxt);
             pgtbl[i] = 0;
         }
     }
@@ -100,8 +100,8 @@ void vm_reap_pagetable_force(pagetable_t pgtbl)
 
 void vm_kernel_init(void)
 {
-    kernel_pagetable = PMA_PA2VA((r_satp() & ((1ul << VMEM_MODE_SHIFT) - 1)) << PAGE_SHIFT);
-    ulong kpgtbl_base_addr = kernel_pagetable - (VA_N_VPN - 3) * (1 << PN_WIDTH);
+    kernel_pagetable = (pagetable_t)PMA_PA2VA((r_satp() & ((1ul << VMEM_MODE_SHIFT) - 1)) << PAGE_SHIFT);
+    ulong kpgtbl_base_addr = (ulong)kernel_pagetable - (VA_N_VPN - 3) * (1 << PN_WIDTH);
     for (int i = 0; i < VA_N_VPN - 2; i++, kpgtbl_base_addr += (1 << PN_WIDTH))
         pkernel_pgtbl[i] = (pte_t *)kpgtbl_base_addr;
     printf("[vm]kernel pagetable binded in vkernel\n");
@@ -116,7 +116,7 @@ void vm_kernel_init(void)
 void vm_hart_enable(void)
 {
     sfence_vma();
-    w_satp(SATP(VMEM_MODE, PMA_VA2PA(kernel_pagetable)));
+    w_satp(SATP(VMEM_MODE, PMA_VA2PA(pkernel_pgtbl[VA_N_VPN - 3])));
     sfence_vma();
 }
 
