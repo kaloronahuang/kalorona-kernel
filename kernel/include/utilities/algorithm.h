@@ -29,7 +29,7 @@ struct list_node
     void *val;
 };
 
-#define list_access(node, typ) (##typ *)((node).val)
+#define list_access(node, typ) (typ *)((node).val)
 
 void list_insert(struct list_node *head, struct list_node *node);
 void list_detach(struct list_node *node);
