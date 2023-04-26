@@ -4,6 +4,10 @@
 
 .section .rodata
 
+.global pkernel_hsm_entry
+pkernel_hsm_entry:
+    .dword __hsm_entry
+
 .global PA_BEGIN
 PA_BEGIN:
     .dword __PA_BEGIN

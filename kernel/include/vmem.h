@@ -122,6 +122,7 @@ void vm_reap_pagetable_force(pagetable_t pgtbl);
 extern pagetable_t kernel_pagetable;
 // vm_kernel_init translates the address through PMA;
 void vm_kernel_init(void);
+void vm_kernel_remove_idmap(void);
 void vm_hart_enable(void);
 
 // User VM;

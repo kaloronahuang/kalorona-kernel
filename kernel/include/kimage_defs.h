@@ -25,6 +25,8 @@ extern char __KERNEL_IMG_VA_END[];
 
 #else
 
+extern uint64 pkernel_hsm_entry;
+
 extern uint64 PA_BEGIN;
 
 extern uint64 KERNEL_IMG_PA_BEGIN;

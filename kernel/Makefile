@@ -92,7 +92,7 @@ clean:
 	rm -rf build/
 
 QEMU = qemu-system-riscv64
-QEMU_MACHINE_FLAGS = -machine virt -m 1024M -nographic -smp 1
+QEMU_MACHINE_FLAGS = -machine virt -m 1024M -nographic -smp 4
 
 UBOOT_FLAGS = -bios $(UBOOT_DIR)/spl/u-boot-spl.bin -device loader,file=$(UBOOT_DIR)/u-boot.itb,addr=0x80200000
 KERNEL_FS_FLAGS = -drive if=none,file=$(PWD)/build/fs.img,format=raw,id=x0 \

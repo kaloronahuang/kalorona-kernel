@@ -105,12 +105,14 @@ void vm_kernel_init(void)
     for (int i = 0; i < VA_N_VPN - 2; i++, kpgtbl_base_addr += (1 << PN_WIDTH))
         pkernel_pgtbl[i] = (pte_t *)kpgtbl_base_addr;
     printf("[vm]kernel pagetable binded in vkernel\n");
+}
+
+void vm_kernel_remove_idmap(void)
+{
     // remove the identical mapping at user address space;
     for (ulong phy_pn = 0; phy_pn != (1ul << (PN_WIDTH - 1)); phy_pn++)
         pkernel_pgtbl[VA_N_VPN - 3][phy_pn] = 0;
     printf("[vm]temporary user-space mapping removed\n");
-    sfence_vma();
-    printf("[vm]kernel pagetable flushed\n");
 }
 
 void vm_hart_enable(void)

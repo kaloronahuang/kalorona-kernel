@@ -22,3 +22,11 @@ __entry:
     add sp, sp, a2
     # Go!
     call kernel_entrypoint
+
+.global __hsm_entry
+__hsm_entry:
+    # Invoked by SBI HSM;
+    # tp register has NOT been written;
+    # a0, a1 - hartid, opaque
+    mv tp, a0
+    jal x1, __entry
