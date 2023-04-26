@@ -40,7 +40,7 @@ static void print_uint(uint64 x, uint64 base)
 static void print_int(int64 x, uint64 base)
 {
     if (x < 0)
-        putchar('-'), x = -x;
+        print_char('-'), x = -x;
     print_uint(x, base);
 }
 
