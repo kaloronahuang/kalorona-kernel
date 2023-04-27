@@ -1,6 +1,7 @@
 
 OBJS = \
 	asm/sbi.o \
+	asm/hart.o \
 	boot/entry.o \
 	boot/entrypoint.o \
 	boot/setup_mmu.o \
@@ -12,7 +13,6 @@ OBJS = \
 	memory/kmem.o \
 	memory/object.o \
 	memory/vmem.o \
-	proc/hart.o \
 	proc/proc.o \
 	proc/trap_handler.o \
 	proc/trap.o \

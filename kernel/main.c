@@ -87,6 +87,7 @@ void kernel_main(int argc, char *const argv[])
         // setup the vmem;
         vm_kernel_init();
         // construct user mode;
+        proc_init();
         // filesystem;
         // load drivers;
         // multicore activating;

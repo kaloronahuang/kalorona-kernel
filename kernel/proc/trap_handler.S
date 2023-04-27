@@ -2,7 +2,7 @@
 
 #include <vmem.h>
 
-.section .trap_handler
+.section .trap_handler.text
 .align 4
 .global user_handler
 user_handler:
