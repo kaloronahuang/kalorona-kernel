@@ -1,6 +1,6 @@
 // hart.c
-#include <proc.h>
 #include <types.h>
+#include <asm/hart.h>
 #include <asm/registers.h>
 #include <asm/scsr.h>
 #include <signal.h>

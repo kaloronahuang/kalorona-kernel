@@ -1,7 +1,7 @@
 // spinlock.h
 #include <types.h>
 #include <lock.h>
-#include <proc.h>
+#include <asm/hart.h>
 #include <signal.h>
 
 void spinlock_init(struct spinlock *lk, char *description)
