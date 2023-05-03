@@ -1,6 +1,7 @@
 // vmem.c
 #include <vmem.h>
 #include <utilities/string.h>
+#include <utilities/bytes.h>
 #include <signal.h>
 #include <asm/spriv.h>
 #include <asm/scsr.h>
@@ -10,6 +11,8 @@
 
 pagetable_t kernel_pagetable;
 static pte_t *pkernel_pgtbl[VA_N_VPN - 2];
+
+extern char user_handler[];
 
 pte_t *vm_walk(pagetable_t pgtbl, ulong va, int alloc)
 {
@@ -98,12 +101,16 @@ void vm_reap_pagetable_force(pagetable_t pgtbl)
     kmem_free_page(pgtbl);
 }
 
+void vm_map_trap_handler(pagetable_t pgtbl) { vm_mappages(pgtbl, VA_USER_KFRAME_BEGIN, (ulong)KERNEL_TRAP_HANDLER_PA_BEGIN, lowbit(VA_USER_KFRAME_BEGIN), PTE_FLAG_R | PTE_FLAG_X); }
+
 void vm_kernel_init(void)
 {
     kernel_pagetable = (pagetable_t)PMA_PA2VA((r_satp() & ((1ul << VMEM_MODE_SHIFT) - 1)) << PAGE_SHIFT);
     ulong kpgtbl_base_addr = (ulong)kernel_pagetable - (VA_N_VPN - 3) * (1 << PN_WIDTH);
     for (int i = 0; i < VA_N_VPN - 2; i++, kpgtbl_base_addr += (1 << PN_WIDTH))
         pkernel_pgtbl[i] = (pte_t *)kpgtbl_base_addr;
+    // mapping the trap_handler;
+    vm_map_trap_handler(kernel_pagetable);
     printf("[vm]kernel pagetable binded in vkernel\n");
 }
 

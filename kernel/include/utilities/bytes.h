@@ -5,6 +5,8 @@
 
 #include <types.h>
 
+#define lowbit(x) ((x) & (-(x)))
+
 void flip_bytes_inplace(void *x, size_t numOfBytes);
 
 uint16 flip_bytes_16(uint16 x);

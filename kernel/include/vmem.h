@@ -116,6 +116,7 @@ void vm_unmappages(pagetable_t pgtbl, ulong va, size_t page_count, int do_free);
 void vm_reap_pagetable(pagetable_t pgtbl);
 // destory the pagetable and its entries;
 void vm_reap_pagetable_force(pagetable_t pgtbl);
+void vm_map_trap_handler(pagetable_t pgtbl);
 
 // Kernel VM;
 
