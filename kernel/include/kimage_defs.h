@@ -13,7 +13,7 @@ extern char __PA_BEGIN[];
 extern char __KERNEL_IMG_PA_BEGIN[];
 extern char __MEMORY_PA_BEGIN[];
 
-extern char __KERNEL_TRAP_HANDLER_PA_BEGIN[];
+extern char __KERNEL_USER_HANDLER_PA_BEGIN[];
 
 extern char __KERNEL_TEXT_PA_BEGIN[];
 extern char __KERNEL_RODATA_PA_BEGIN[];
@@ -34,7 +34,7 @@ extern uint64 PA_BEGIN;
 extern uint64 KERNEL_IMG_PA_BEGIN;
 extern uint64 MEMORY_PA_BEGIN;
 
-extern uint64 KERNEL_TRAP_HANDLER_PA_BEGIN;
+extern uint64 KERNEL_USER_HANDLER_PA_BEGIN;
 
 extern uint64 KERNEL_TEXT_PA_BEGIN;
 extern uint64 KERNEL_RODATA_PA_BEGIN;

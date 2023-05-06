@@ -36,7 +36,8 @@
 #define VA_N_VPN VMEM_SV39_N_VPN
 
 // SV39 - Virtual Memory Layout;
-#define VA_USER_KFRAME_BEGIN 0x3FFFFF0000
+#define VA_USER_USER_HANDLER_BEGIN 0x3FFFFF0000
+#define VA_USER_TRAPFRAME_BEGIN 0x3FFFFF8000
 #define VA_KERNEL_BEGIN 0xFFFFFFC000000000
 
 #define VA_KERNEL_PMA_BEGIN VA_KERNEL_BEGIN
@@ -51,7 +52,8 @@
 #define VA_N_VPN VMEM_SV48_N_VPN
 
 // SV48 - Virtual Memory Layout;
-#define VA_USER_KFRAME_BEGIN 0x7FFFFC000000
+#define VA_USER_USER_HANDLER_BEGIN 0x7FFFFFFF0000
+#define VA_USER_TRAPFRAME_BEGIN 0x7FFFFFFF8000
 #define VA_KERNEL_BEGIN 0xFFFF800000000000
 
 #define VA_KERNEL_PMA_BEGIN VA_KERNEL_BEGIN
@@ -64,7 +66,8 @@
 #define VA_N_VPN VMEM_SV57_N_VPN
 
 // SV57 - Virtual Memory Layout;
-#define VA_USER_KFRAME_BEGIN 0xFFFFFFFC000000
+#define VA_USER_USER_HANDLER_BEGIN 0xFFFFFFFFFF0000
+#define VA_USER_TRAPFRAME_BEGIN 0xFFFFFFFFFF8000
 #define VA_KERNEL_BEGIN 0x100000000000000
 
 #define VA_KERNEL_PMA_BEGIN VA_KERNEL_BEGIN
@@ -72,7 +75,8 @@
 
 #endif
 
-#define VA_USER_KFRAME_SIZE 0x4000000
+#define VA_USER_USER_HANDLER_SIZE 0x8000
+#define VA_USER_TRAPFRAME_SIZE 0x8000
 
 #define VA_KERNEL_MOD_BEGIN 0xFFFFFFFF00000000
 #define VA_KERNEL_IMG_BEGIN 0xFFFFFFFF80000000
@@ -116,7 +120,7 @@ void vm_unmappages(pagetable_t pgtbl, ulong va, size_t page_count, int do_free);
 void vm_reap_pagetable(pagetable_t pgtbl);
 // destory the pagetable and its entries;
 void vm_reap_pagetable_force(pagetable_t pgtbl);
-void vm_map_trap_handler(pagetable_t pgtbl);
+void vm_map_user_handler(pagetable_t pgtbl);
 
 // Kernel VM;
 

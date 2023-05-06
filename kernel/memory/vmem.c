@@ -61,7 +61,7 @@ void vm_unmappages(pagetable_t pgtbl, ulong va, size_t page_count, int do_free)
         if (entry == NULL || ((*entry) & PTE_FLAG_V) == 0 || (*entry & ((1ul << PTE_FLAGS_WIDTH) - 1)) == PTE_FLAG_V)
             panic("vm_unmappages - broken entry");
         if (do_free)
-            kmem_free((void *)PMA_PA2VA(PTE_PA(*entry)));
+            kmem_free_page((void *)PMA_PA2VA(PTE_PA(*entry)));
         *entry = 0;
     }
 }
@@ -101,7 +101,7 @@ void vm_reap_pagetable_force(pagetable_t pgtbl)
     kmem_free_page(pgtbl);
 }
 
-void vm_map_trap_handler(pagetable_t pgtbl) { vm_mappages(pgtbl, VA_USER_KFRAME_BEGIN, (ulong)KERNEL_TRAP_HANDLER_PA_BEGIN, lowbit(VA_USER_KFRAME_BEGIN), PTE_FLAG_R | PTE_FLAG_X); }
+void vm_map_user_handler(pagetable_t pgtbl) { vm_mappages(pgtbl, VA_USER_USER_HANDLER_BEGIN, (ulong)KERNEL_USER_HANDLER_PA_BEGIN, VA_USER_USER_HANDLER_SIZE, PTE_FLAG_R | PTE_FLAG_X); }
 
 void vm_kernel_init(void)
 {
@@ -109,8 +109,8 @@ void vm_kernel_init(void)
     ulong kpgtbl_base_addr = (ulong)kernel_pagetable - (VA_N_VPN - 3) * (1 << PN_WIDTH);
     for (int i = 0; i < VA_N_VPN - 2; i++, kpgtbl_base_addr += (1 << PN_WIDTH))
         pkernel_pgtbl[i] = (pte_t *)kpgtbl_base_addr;
-    // mapping the trap_handler;
-    vm_map_trap_handler(kernel_pagetable);
+    // mapping the trapframe;
+    vm_map_user_handler(kernel_pagetable);
     printf("[vm]kernel pagetable binded in vkernel\n");
 }
 
@@ -134,6 +134,6 @@ pagetable_t vm_user_make_pagetable(void)
     pagetable_t ret = kmem_alloc_pages(0);
     if (ret == NULL)
         panic("vm_user_make_pagetable - no space");
-    // TODO: map the trapframe;
+    vm_map_user_handler(ret);
     return ret;
 }

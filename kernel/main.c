@@ -16,6 +16,7 @@
 #include <device.h>
 #include <device/memory.h>
 #include <signal.h>
+#include <trap.h>
 
 __attribute__((aligned(4096))) char vkernel_stack[VKERNEL_STACK_SIZE * MAX_CPU];
 
@@ -88,6 +89,8 @@ void kernel_main(int argc, char *const argv[])
         vm_kernel_init();
         // construct user mode;
         proc_init();
+        // trap handler install;
+        ktrap_install_handler();
         // filesystem;
         // load drivers;
         // multicore activating;
@@ -110,6 +113,8 @@ void kernel_main(int argc, char *const argv[])
     }
     else
     {
+        // trap handler install;
+        ktrap_install_handler();
         spinlock_acquire(&started_hart_count_lock);
         started_hart_count++;
         spinlock_release(&started_hart_count_lock);

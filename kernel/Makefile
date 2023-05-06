@@ -14,8 +14,9 @@ OBJS = \
 	memory/object.o \
 	memory/vmem.o \
 	proc/proc.o \
-	proc/trap_handler.o \
-	proc/trap.o \
+	trap/trap.o \
+	trap/kernel_handler.o \
+	trap/user_handler.o \
 	utilities/algorithm/qsort.o \
 	utilities/algorithm/list.o \
 	utilities/string.o \

@@ -1,15 +1,16 @@
-# trap_handler.S
+# user_handler.S
 
 #include <vmem.h>
 
-.section .trap_handler.text
+.section .user_handler.text
 .align 4
+
 .global user_handler
 user_handler:
     # temporarily save a0 to sscratch;
     csrw sscratch, a0
     # set trapframe addr to a0;
-    li a0, VA_USER_KFRAME_BEGIN
+    li a0, VA_USER_TRAPFRAME_BEGIN
     # save regs to trapframe;
     sd ra, 40(a0)
     sd sp, 48(a0)
@@ -76,7 +77,7 @@ user_return:
     # user vm;
 
     # recover regs;
-    li a0, VA_USER_KFRAME_BEGIN
+    li a0, VA_USER_TRAPFRAME_BEGIN
 
     ld ra, 40(a0)
     ld sp, 48(a0)
