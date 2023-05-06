@@ -166,7 +166,7 @@ struct kmem_object_block_struct *kmem_object_create_block(struct kmem_object_man
 struct kmem_object_manager_struct *kmem_object_create_manager(size_t object_size, const char *name)
 {
     struct kmem_object_manager_struct *new_mgr = (struct kmem_object_manager_struct *)kmem_object_alloc(&kmem.object_manager);
-    strncpy(new_mgr->block_name, name, KMEM_OBJECT_BLOCK_NAME_MAXLEN);
+    new_mgr->block_name = name;
     new_mgr->object_size = BINARY_ROUND_UP(object_size, OBJECT_ALIGNMENT);
     new_mgr->blocks = NULL;
     new_mgr->nxt = NULL;
@@ -182,7 +182,7 @@ struct kmem_object_manager_struct *kmem_object_create_manager(size_t object_size
 void kmem_object_init(void)
 {
     printf("[kmem_object]initializing\n");
-    strcpy(kmem.object_manager.block_name, "kmem_obj_mgr");
+    kmem.object_manager.block_name = "kmem_obj_mgr";
     kmem.object_manager.object_size = BINARY_ROUND_UP(sizeof(struct kmem_object_manager_struct), OBJECT_ALIGNMENT);
     spinlock_init(&kmem.object_manager_lock, "kmem_object_manager_lock");
 }

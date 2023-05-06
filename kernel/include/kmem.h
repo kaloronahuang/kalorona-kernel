@@ -23,7 +23,6 @@
 
 #define MAX_MEM_ORDER 11
 
-#define KMEM_OBJECT_BLOCK_NAME_MAXLEN 16
 #define OBJECT_ALIGNMENT 0x8
 
 // bootmem;
@@ -98,7 +97,7 @@ void kmem_object_header_insert(struct kmem_object_header_struct *head, struct km
 
 struct kmem_object_manager_struct
 {
-    char block_name[KMEM_OBJECT_BLOCK_NAME_MAXLEN];
+    char *block_name;
     size_t object_size;
 
     struct spinlock lock;
