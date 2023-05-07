@@ -22,6 +22,9 @@ extern char __KERNEL_BSS_PA_BEGIN[];
 
 extern char __KERNEL_IMG_PA_END[];
 
+extern char __KERNEL_USER_HANDLER_VA[];
+extern char __KERNEL_USER_RETURN_VA[];
+
 extern char __KERNEL_IMG_VA_BEGIN[];
 extern char __KERNEL_IMG_VA_END[];
 
@@ -42,6 +45,9 @@ extern uint64 KERNEL_DATA_PA_BEGIN;
 extern uint64 KERNEL_BSS_PA_BEGIN;
 
 extern uint64 KERNEL_IMG_PA_END;
+
+extern uint64 KERNEL_USER_HANDLER_VA;
+extern uint64 KERNEL_USER_RETURN_VA;
 
 extern uint64 KERNEL_IMG_VA_BEGIN;
 extern uint64 KERNEL_IMG_VA_END;

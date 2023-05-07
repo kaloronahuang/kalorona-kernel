@@ -103,14 +103,14 @@ void vm_reap_pagetable_force(pagetable_t pgtbl)
 
 void vm_map_user_handler(pagetable_t pgtbl) { vm_mappages(pgtbl, VA_USER_USER_HANDLER_BEGIN, (ulong)KERNEL_USER_HANDLER_PA_BEGIN, VA_USER_USER_HANDLER_SIZE, PTE_FLAG_R | PTE_FLAG_X); }
 
+void vm_unmap_user_handler(pagetable_t pgtbl) { vm_unmappages(pgtbl, VA_USER_USER_HANDLER_BEGIN, VA_USER_USER_HANDLER_SIZE, false); }
+
 void vm_kernel_init(void)
 {
     kernel_pagetable = (pagetable_t)PMA_PA2VA((r_satp() & ((1ul << VMEM_MODE_SHIFT) - 1)) << PAGE_SHIFT);
     ulong kpgtbl_base_addr = (ulong)kernel_pagetable - (VA_N_VPN - 3) * (1 << PN_WIDTH);
     for (int i = 0; i < VA_N_VPN - 2; i++, kpgtbl_base_addr += (1 << PN_WIDTH))
         pkernel_pgtbl[i] = (pte_t *)kpgtbl_base_addr;
-    // mapping the trapframe;
-    vm_map_user_handler(kernel_pagetable);
     printf("[vm]kernel pagetable binded in vkernel\n");
 }
 
@@ -120,6 +120,9 @@ void vm_kernel_remove_idmap(void)
     for (ulong phy_pn = 0; phy_pn != (1ul << (PN_WIDTH - 1)); phy_pn++)
         pkernel_pgtbl[VA_N_VPN - 3][phy_pn] = 0;
     printf("[vm]temporary user-space mapping removed\n");
+    // mapping the trapframe;
+    vm_map_user_handler(kernel_pagetable);
+    printf("[vm]mapped the trapframe\n");
 }
 
 void vm_hart_enable(void)

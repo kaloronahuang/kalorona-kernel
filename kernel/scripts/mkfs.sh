@@ -20,6 +20,9 @@ mkdir $BUILD_DIR/fs/boot
 cp $BUILD_DIR/kernel.elf $BUILD_DIR/fs/boot/kernel.elf
 cp $PWD/scripts/boot.scr $BUILD_DIR/fs/boot.scr
 
+echo "Wait for FS to process"
+sleep 1.5s
+
 umount $BUILD_DIR/fs
 
 # Detach;

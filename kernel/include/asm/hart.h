@@ -1,7 +1,7 @@
 // hart.h
 #ifndef ASM_HART
 
-#define HART
+#define ASM_HART
 
 #include <types.h>
 #include <parameters.h>

@@ -23,12 +23,15 @@ SECTIONS
     PROVIDE(__MEMORY_PA_BEGIN = .);
     
     . += 2M;
-    
+
     /* Boot Section */
     .boot.text : {
         *(.boot.text .boot.text.*)
+        . = ALIGN(0x8000);
+        PROVIDE(__KERNEL_USER_HANDLER_PA_BEGIN = .);
+        *(.user_handler)
     }
-    . = ALIGN(0x1000);
+    . = ALIGN(0x8000);
     .boot.rodata : {
         *(.boot.rodata .boot.rodata.*)
     }
@@ -42,23 +45,14 @@ SECTIONS
     }
     . = ALIGN(0x1000);
 
-    PROVIDE(__KERNEL_USER_HANDLER_PA_BEGIN = .);
-
-    /* Trap Handler - Shared by Kspace & Uspace */
-    /* binded at VA_USER_USER_HANDLER_BEGIN */
-    . = VA_USER_USER_HANDLER_BEGIN;
-    .user_handler.text : AT(__KERNEL_USER_HANDLER_PA_BEGIN) {
-        *(.user_handler.text .user_handler.text.*)
-    }
-    . = ALIGN(0x1000);
-
-    PROVIDE(__KERNEL_TEXT_PA_BEGIN = SECTION_PA(.user_handler.text, 0x1000));
+    PROVIDE(__KERNEL_TEXT_PA_BEGIN = SECTION_PA(.boot.bss, 0x1000));
 
     /* Kernel Addressing Space */
     . = VA_KERNEL_IMG_BEGIN;
     PROVIDE(__KERNEL_IMG_VA_BEGIN = .);
 
     . += __KERNEL_TEXT_PA_BEGIN - __KERNEL_IMG_PA_BEGIN;
+    __kernel_va_begin = .;
 
     .text : AT(__KERNEL_TEXT_PA_BEGIN) {
         *(.text .text.*)

@@ -16,7 +16,7 @@ void list_insert(struct list_node *head, struct list_node *node)
 void list_detach(struct list_node *node)
 {
     if (node == NULL)
-        panic("list_insert - null parameters");
+        panic("list_detach - null parameters");
     if (node->prv != NULL)
         node->prv->nxt = node->nxt;
     if (node->nxt != NULL)

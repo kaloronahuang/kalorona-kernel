@@ -2,9 +2,7 @@
 
 #include <vmem.h>
 
-.section .user_handler.text
-.align 4
-
+.section .user_handler
 .global user_handler
 user_handler:
     # temporarily save a0 to sscratch;

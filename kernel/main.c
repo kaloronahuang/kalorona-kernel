@@ -135,6 +135,5 @@ void kernel_main(int argc, char *const argv[])
     printf("[kernel] hart #%d ready\n", (int)r_tp());
 
     // scheduling;
-    while (true)
-        ;
+    scheduler();
 }
