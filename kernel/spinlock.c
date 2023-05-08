@@ -30,7 +30,7 @@ void spinlock_release(struct spinlock *lk)
     if (!is_holding_spinlock(lk))
         panic("spinlock_release - spinlock not held;");
     lk->hart = 0;
-    
+
     __sync_synchronize();
 
     __sync_lock_release(&lk->locked);

@@ -105,6 +105,15 @@ long sbi_legacy_console_putchar(int ch);
 
 long sbi_legacy_console_getchar(void);
 
+// Timer Extension FID Definition (EID #0x54494D45 "TIME");
+
+enum sbi_timer_fid
+{
+    SBI_TIMER_SET_TIMER = 0
+};
+
+struct sbiret sbi_set_timer(uint64 stime_value);
+
 // Hart State Management Extension FID Definition (EID #0x48534D "HSM");
 
 enum sbi_hsm_hart_stat

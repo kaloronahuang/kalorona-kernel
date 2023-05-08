@@ -12,7 +12,7 @@ void ktrap_install_handler(void) { w_stvec((uint64)kernel_handler); }
 
 void ktrap_handler(void)
 {
-    // TODO;
+    printf("[ktrap]");
 }
 
 // jumping from user space (trapframe);
@@ -22,9 +22,17 @@ void utrap_handler(void)
 
     struct proc_struct *p = current_hart()->running_proc;
     p->trapframe->user_pc = r_sepc();
+    printf("[utrap]scause: %d\n", r_scause());
 
-    // handle;
-    printf("[ktrap] TRAPPING!");
+    // Environment call from U-mode;
+    if (r_scause() == 8)
+    {
+        if (proc_is_killed(p))
+            proc_exit(-1);
+        p->trapframe->user_pc += 4;
+        enable_interrupt();
+        syscall_handler();
+    }
 
     // return;
     utrap_return();
@@ -41,7 +49,7 @@ void utrap_return(void)
     p->trapframe->kernel_handler_addr = (uint64)utrap_handler;
     p->trapframe->kernel_hartid = r_tp();
     // just a try;
-    p->trapframe->kernel_sp = (uint64)(vkernel_stack + (r_tp() + 1) * VKERNEL_STACK_SIZE);
+    p->trapframe->kernel_sp = (uint64)p->kstack_vaddr + (PAGE_SIZE << 0);
 
     uint64 sstatus = r_sstatus();
     sstatus &= (~SSTATUS_SPP);

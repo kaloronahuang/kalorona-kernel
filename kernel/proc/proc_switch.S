@@ -1,8 +1,8 @@
-# proc_swtch.S
+# proc_switch.S
 
-# void proc_swtch(void *old_frame, void *new_frame)
-.global proc_swtch
-proc_swtch:
+# void proc_switch(void *old_frame, void *new_frame)
+.global proc_switch
+proc_switch:
     sd ra, 0(a0)
     sd sp, 8(a0)
     sd s0, 16(a0)

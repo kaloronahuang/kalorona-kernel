@@ -33,11 +33,18 @@ struct sbiret sbi_ecall(
     return ret;
 }
 
+// Timer Extension;
+
+struct sbiret sbi_set_timer(uint64 stime_value)
+{
+    return sbi_ecall(SBI_TIMER_EXT, SBI_TIMER_SET_TIMER, stime_value, 0, 0, 0, 0, 0);
+}
+
 // HSM Extension;
 
 struct sbiret sbi_hsm_hart_start(ulong hartid,
-                             ulong start_addr,
-                             ulong opaque)
+                                 ulong start_addr,
+                                 ulong opaque)
 {
     return sbi_ecall(SBI_HSM_EXT, SBI_HSM_HART_START, hartid, start_addr, opaque, 0, 0, 0);
 }
@@ -53,8 +60,8 @@ struct sbiret sbi_hsm_hart_get_status(ulong hartid)
 }
 
 struct sbiret sbi_hsm_hart_suspend(uint32 suspend_type,
-                               ulong resume_addr,
-                               ulong opaque)
+                                   ulong resume_addr,
+                                   ulong opaque)
 {
     return sbi_ecall(SBI_HSM_EXT, SBI_HSM_HART_SUSPEND, suspend_type, resume_addr, opaque, 0, 0, 0);
 }

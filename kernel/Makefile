@@ -14,8 +14,9 @@ OBJS = \
 	memory/object.o \
 	memory/vmem.o \
 	proc/proc.o \
-	proc/proc_swtch.o \
+	proc/proc_switch.o \
 	proc/scheduler.o \
+	proc/syscall.o \
 	trap/trap.o \
 	trap/kernel_handler.o \
 	trap/user_handler.o \
