@@ -4,7 +4,7 @@
 #include <utilities/bytes.h>
 #include <signal.h>
 #include <asm/spriv.h>
-#include <asm/scsr.h>
+#include <asm/csr.h>
 #include <console.h>
 #include <kimage_defs.h>
 #include <device/memory.h>

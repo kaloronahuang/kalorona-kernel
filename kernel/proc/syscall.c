@@ -8,7 +8,6 @@ void syscall_handler(void)
     switch (call_typ)
     {
     case SYSCALL_CODE_EXIT:
-        printf("[syscall]EXIT %d\n", frame->a0);
         proc_exit(frame->a0);
         break;
 

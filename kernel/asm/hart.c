@@ -2,7 +2,7 @@
 #include <types.h>
 #include <asm/hart.h>
 #include <asm/registers.h>
-#include <asm/scsr.h>
+#include <asm/csr.h>
 #include <signal.h>
 
 size_t hart_count;

@@ -1,7 +1,7 @@
-// scsr.h
-#ifndef ASM_SCSR
+// csr.h
+#ifndef ASM_CSR
 
-#define ASM_SCSR
+#define ASM_CSR
 
 #include <types.h>
 
@@ -88,6 +88,10 @@ static inline void w_sip(uint64 x)
 // CSR - sie;
 // Supervisor interrupt-enable register;
 
+#define SIE_SEIE (1L << 9)
+#define SIE_STIE (1L << 5)
+#define SIE_SSIE (1L << 1)
+
 static inline uint64 r_sie()
 {
     uint64 x;
@@ -159,6 +163,17 @@ static inline void w_sepc(uint64 x)
 
 // CSR - scause;
 // Supervisor Cause Register;
+
+// Interrupt flag;
+#define SCAUSE_INTERRUPT (1ul << 63)
+// Supervisor software interrupt;
+#define SCAUSE_SSI (SCAUSE_INTERRUPT | 1)
+// Supervisor timer interrupt;
+#define SCAUSE_STI (SCAUSE_INTERRUPT | 5)
+// Supervisor external interrupt;
+#define SCAUSE_SEI (SCAUSE_INTERRUPT | 9)
+// Ecall from U-mode;
+#define SCAUSE_USER_ECALL 8
 
 static inline uint64 r_scause()
 {
@@ -233,6 +248,26 @@ static inline void w_satp(uint64 x)
     asm volatile("csrw satp, %0"
                  :
                  : "r"(x));
+}
+
+// CSR - time;
+
+static inline uint64 r_time()
+{
+    uint64 x;
+    asm volatile("rdtime %0"
+                 : "=r"(x));
+    return x;
+}
+
+// CSR - cycle;
+
+static inline uint64 r_cycle()
+{
+    uint64 x;
+    asm volatile("rdcycle %0"
+                 : "=r"(x));
+    return x;
 }
 
 #endif

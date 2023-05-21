@@ -77,3 +77,5 @@ kernel_handler:
     ld t6, 240(sp)
 
     addi sp, sp, 256
+
+    sret

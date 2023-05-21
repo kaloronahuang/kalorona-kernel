@@ -20,8 +20,15 @@ void scheduler(void)
                 spinlock_release(&(proc_manager.lock));
 
                 this_hart->running_proc = p;
+
+                // timer;
+                // enable timer interrupt;
                 proc_switch(&(this_hart->context), &(p->context));
+                
                 this_hart->running_proc = NULL;
+
+                spinlock_acquire(&(proc_manager.lock));
+                locked = true;
             }
         }
         if (locked)
@@ -37,4 +44,13 @@ void scheduler_switch(void)
     proc_switch(&(p->context), &(current_hart()->context));
     // recover;
     current_hart()->trap_enabled = interrupt_status;
+}
+
+void scheduler_yield(void)
+{
+    struct proc_struct *p = current_hart()->running_proc;
+    spinlock_acquire(&(proc_manager.lock));
+    p->state = PROC_RUNNABLE;
+    spinlock_release(&(proc_manager.lock));
+    scheduler_switch();
 }

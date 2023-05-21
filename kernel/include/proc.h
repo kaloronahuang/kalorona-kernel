@@ -82,8 +82,11 @@ int proc_fork(void);
 
 void proc_init(void);
 
+#define SCHEDULING_TIME_SPAN 1000000
+
 void scheduler(void);
 void scheduler_switch(void);
+void scheduler_yield(void);
 
 // system call definitions;
 

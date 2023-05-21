@@ -4,7 +4,7 @@
 #define KMEM
 
 #include <asm/spriv.h>
-#include <asm/scsr.h>
+#include <asm/csr.h>
 #include <types.h>
 #include <parameters.h>
 #include <vmem.h>

@@ -202,13 +202,13 @@ int proc_fork(void)
 {
 }
 
-void proc_test()
+void proc_spawn_test_prog()
 {
-    char user_prog[] = {0x13, 0x05, 0x10, 0x00, 0x93, 0x08, 0xC0, 0x03, 0x73, 0x00, 0x00, 0x00};
+    char user_prog[] = {0x13, 0x05, 0x10, 0x00, 0x93, 0x08, 0x00, 0x00, 0x73, 0x00, 0x00, 0x00, 0x6f, 0xf0, 0x5f, 0xff};
     int pid = proc_create();
     char *image = (char *)proc_extend_heap(pid, 0);
     proc_extend_stack(pid, 0);
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 16; i++)
         image[i] = user_prog[i];
     proc_set_state(pid, PROC_RUNNABLE);
 }
@@ -221,5 +221,8 @@ void proc_init(void)
     proc_manager.proc_list.nxt_proc = NULL;
     proc_manager.proc_list.prv_proc = NULL;
     // test purpose;
-    proc_test();
+    proc_spawn_test_prog();
+    proc_spawn_test_prog();
+    proc_spawn_test_prog();
+    proc_spawn_test_prog();
 }
