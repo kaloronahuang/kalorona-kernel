@@ -26,7 +26,7 @@ pte_t *vm_walk(pagetable_t pgtbl, ulong va, int alloc)
             if (!alloc || (pgtbl = (pagetable_t)kmem_alloc_pages(0)) == 0)
                 return NULL;
             memset(pgtbl, 0, PAGE_SIZE);
-            *e = PA_PTE(PMA_VA2PA(pgtbl)) | PTE_FLAG_V;
+            *e = (PA_PTE(PMA_VA2PA(pgtbl)) | PTE_FLAG_V);
         }
     }
     return &pgtbl[VA_GET_PN(0, va)];
@@ -45,7 +45,7 @@ int vm_mappages(pagetable_t pgtbl, ulong va, ulong pa, size_t siz, ulong flags)
             return -1;
         if ((*entry) & PTE_FLAG_V)
             panic("vm_mappages - overlapped");
-        *entry = PA_PTE(pa) | PTE_FLAG_V | flags;
+        *entry = (PA_PTE(pa) | PTE_FLAG_V | flags);
     }
     return 0;
 }
@@ -135,8 +135,52 @@ void vm_hart_enable(void)
 pagetable_t vm_user_make_pagetable(void)
 {
     pagetable_t ret = kmem_alloc_pages(0);
+    memset(ret, 0, PAGE_SIZE);
     if (ret == NULL)
         panic("vm_user_make_pagetable - no space");
     vm_map_user_handler(ret);
     return ret;
+}
+
+static void vm_uvmcpy_recursive(pagetable_t pgtbl, pagetable_t new_pgtbl, int level, int overwite)
+{
+    for (ulong pn = 0; pn != (1 << PN_WIDTH); pn++)
+    {
+        pte_t pte = pgtbl[pn];
+        if (!overwite && new_pgtbl[pn] != 0)
+            continue;
+        if (pte & PTE_FLAG_V)
+            if (pte & (PTE_FLAG_R | PTE_FLAG_X))
+            {
+                // leaf entry;
+                // copy the content inside and re-pointing at the new page;
+                ulong new_page = (ulong)kmem_alloc_pages(0);
+                memcpy(new_page, PMA_PA2VA(PTE_PA(pte)), PAGE_SIZE);
+                // make flags and pa together;
+                new_pgtbl[pn] = (PA_PTE(PMA_VA2PA(new_page)) | (pte & ((1ul << PTE_FLAGS_WIDTH) - 1)));
+            }
+            else if (level > 0)
+            {
+                // make a new sub pagetable;
+                pagetable_t new_subpgtble = (pagetable_t)kmem_alloc_pages(0);
+                new_pgtbl[pn] = (PA_PTE(PMA_VA2PA(new_subpgtble)) | (pte & ((1ul << PTE_FLAGS_WIDTH) - 1)));
+                vm_uvmcpy_recursive((pagetable_t)PMA_PA2VA(PTE_PA(pgtbl[pn])), new_subpgtble, level - 1, overwite);
+            }
+    }
+}
+
+void vm_uvmcpy(pagetable_t pgtbl, pagetable_t new_pgtbl, int overwite) { vm_uvmcpy_recursive(pgtbl, new_pgtbl, VA_N_VPN - 1, overwite); }
+
+void vm_memcpy(pagetable_t pgtbl, void *dst, void *vsrc, size_t size)
+{
+    ulong vsrc_endpos = (ulong)vsrc + size;
+    while ((ulong)vsrc != vsrc_endpos)
+    {
+        pte_t *entry = vm_walk(pgtbl, vsrc, 0);
+        ulong vsrc_addr = PMA_PA2VA((PTE_PA(*entry) << PAGE_SHIFT) + ((ulong)vsrc & (PAGE_SIZE - 1)));
+        if (((ulong)vsrc >> PAGE_SHIFT) != ((ulong)vsrc_endpos >> PAGE_SHIFT))
+            memcpy(dst, vsrc_addr, PAGE_SIZE - ((ulong)vsrc & (PAGE_SIZE - 1)));
+        else
+            memcpy(dst, vsrc_addr, vsrc_endpos - (ulong)vsrc);
+    }
 }

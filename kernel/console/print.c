@@ -109,3 +109,21 @@ int printf(const char *fmt, ...)
         spinlock_release(&(console_lock.lock));
     return 0;
 }
+
+void print_buffer(void *buf, size_t size)
+{
+    if (console_lock.locking_enabled)
+        spinlock_acquire(&(console_lock.lock));
+    for (size_t i = 0; i != size; i++)
+    {
+        if (*((uint8 *)(buf + i)) < 16)
+            print_char('0');
+        print_uint(*((uint8 *)(buf + i)), 16);
+        print_char(' ');
+        if ((i + 1) % 16 == 0 && i != size - 1)
+            print_char('\n');
+    }
+    print_char('\n');
+    if (console_lock.locking_enabled)
+        spinlock_release(&(console_lock.lock));
+}

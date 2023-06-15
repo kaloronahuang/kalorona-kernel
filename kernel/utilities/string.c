@@ -105,6 +105,7 @@ char *strcpy(char *dst, const char *src)
     char *ret = dst;
     while (*src != '\0')
         *(dst++) = *(src++);
+    *dst = '\0';
     return ret;
 }
 
@@ -113,6 +114,7 @@ char *strncpy(char *dst, const char *src, size_t siz)
     char *ret = dst;
     while (siz-- && *src != '\0')
         *(dst++) = *(src++);
+    *dst = '\0';
     return ret;
 }
 

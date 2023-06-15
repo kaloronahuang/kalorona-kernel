@@ -20,9 +20,7 @@ void scheduler(void)
                 spinlock_release(&(proc_manager.lock));
 
                 this_hart->running_proc = p;
-
-                // timer;
-                // enable timer interrupt;
+                
                 proc_switch(&(this_hart->context), &(p->context));
                 
                 this_hart->running_proc = NULL;

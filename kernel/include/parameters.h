@@ -17,5 +17,6 @@
 // Support toggles;
 
 #define SBI_LEGACY_SUPPORT
+#define KERNEL_DEBUG_MODE
 
 #endif

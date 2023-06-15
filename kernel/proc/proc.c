@@ -71,14 +71,18 @@ int proc_create()
     p->heap_vaddr = (void *)VA_USER_BEGIN;
     p->pgtbl = vm_user_make_pagetable();
 
+    p->kstack_vaddr = kmem_alloc_pages(0);
+
     p->trapframe = (struct trapframe_struct *)kmem_alloc_pages(0);
     memset(p->trapframe, 0, sizeof(struct trapframe_struct));
+    p->trapframe->user_pc = VA_USER_BEGIN;
+    p->trapframe->sp = p->stack_vaddr;
+    p->trapframe->kernel_sp = (uint64)p->kstack_vaddr + (PAGE_SIZE << 0);
 
     vm_mappages(p->pgtbl, VA_USER_TRAPFRAME_BEGIN, PMA_VA2PA(p->trapframe), sizeof(struct trapframe_struct), PTE_FLAG_R | PTE_FLAG_W);
 
     memset(&(p->context), 0, sizeof(struct context_struct));
 
-    p->kstack_vaddr = kmem_alloc_pages(0);
     p->context.sp = (uint64)p->kstack_vaddr + (PAGE_SIZE << 0);
     p->context.ra = (uint64)utrap_return;
 
@@ -123,7 +127,7 @@ void proc_reap(int pid)
     // stack;
     vm_unmappages(p->pgtbl, (ulong)p->stack_vaddr, (VA_USER_USER_HANDLER_BEGIN - (ulong)p->stack_vaddr) >> PAGE_SHIFT, true);
     // heap;
-    vm_unmappages(p->pgtbl, (ulong)p->heap_vaddr, ((ulong)p->heap_vaddr - VA_USER_BEGIN) >> PAGE_SHIFT, true);
+    vm_unmappages(p->pgtbl, VA_USER_BEGIN, ((ulong)p->heap_vaddr - VA_USER_BEGIN) >> PAGE_SHIFT, true);
     // free the proc;
     kmem_free((void *)p);
 }
@@ -150,14 +154,14 @@ void *proc_extend_stack(int pid, int page_order)
     return (void *)extended_pages;
 }
 
-void *proc_extend_heap(int pid, int page_order)
+void *proc_extend_heap(int pid, int page_order, ulong mem_flag)
 {
     struct proc_struct *p = proc_lock_and_find(pid);
     if (p == NULL)
         return NULL;
     ulong extended_pages = (ulong)kmem_alloc_pages(page_order);
     ulong size = (1ul << (page_order + PAGE_SHIFT));
-    vm_mappages(p->pgtbl, (ulong)p->heap_vaddr, PMA_VA2PA(extended_pages), size, PTE_FLAG_R | PTE_FLAG_W | PTE_FLAG_X | PTE_FLAG_U);
+    vm_mappages(p->pgtbl, (ulong)p->heap_vaddr, PMA_VA2PA(extended_pages), size, mem_flag | PTE_FLAG_U);
     p->heap_vaddr += size;
     spinlock_release(&(proc_manager.lock));
     return (void *)extended_pages;
@@ -194,21 +198,53 @@ void proc_exit(int status_code)
     // no came back;
 }
 
-void proc_kill(int pid)
+int proc_kill(int pid)
 {
+    struct proc_struct *p = proc_lock_and_find(pid);
+    if (p == NULL)
+        return -1;
+    p->killed = true;
+    if (p->state == PROC_SLEEPING)
+        p->state = PROC_RUNNABLE;
+    spinlock_release(&(proc_manager.lock));
+    return 0;
 }
 
 int proc_fork(void)
 {
+    struct proc_struct *p = current_hart()->running_proc;
+    int dup_pid = proc_create();
+    if (dup_pid == -1)
+        return -1;
+    struct proc_struct *dup = proc_lock_and_find(dup_pid);
+    // copy all the way;
+    dup->parent = p;
+    dup->stack_vaddr = p->stack_vaddr;
+    dup->heap_vaddr = p->heap_vaddr;
+    ulong kernel_sp = dup->trapframe->kernel_sp;
+    memcpy(dup->trapframe, p->trapframe, sizeof(struct trapframe_struct));
+    dup->trapframe->a0 = 0;
+    dup->trapframe->kernel_sp = kernel_sp;
+    // the addressing space;
+    vm_uvmcpy(p->pgtbl, dup->pgtbl, false);
+    // something strange: not copying context;
+    // reason: context here is actually the context at proc_switch;
+    //         regs are already in trapframe;
+    //         scheduler -> utrap_return -(trapframe data)-> user program;
+    // set the process free;
+    dup->state = PROC_RUNNABLE;
+    spinlock_release(&(proc_manager.lock));
+    return dup->pid;
 }
 
 void proc_spawn_test_prog()
 {
-    char user_prog[] = {0x13, 0x05, 0x10, 0x00, 0x93, 0x08, 0x00, 0x00, 0x73, 0x00, 0x00, 0x00, 0x6f, 0xf0, 0x5f, 0xff};
+    char user_prog[] = {0x93, 0x08, 0x00, 0x00, 0x73, 0x00, 0x00, 0x00, 0x93, 0x08, 0x20, 0x00, 0x73, 0x00, 0x00, 0x00,
+                        0x93, 0x08, 0x00, 0x00, 0x73, 0x00, 0x00, 0x00, 0x93, 0x08, 0x10, 0x00, 0x73, 0x00, 0x00, 0x00};
     int pid = proc_create();
-    char *image = (char *)proc_extend_heap(pid, 0);
+    char *image = (char *)proc_extend_heap(pid, 0, PTE_FLAG_R | PTE_FLAG_X);
     proc_extend_stack(pid, 0);
-    for (int i = 0; i < 16; i++)
+    for (int i = 0; i < sizeof(user_prog); i++)
         image[i] = user_prog[i];
     proc_set_state(pid, PROC_RUNNABLE);
 }
@@ -221,8 +257,5 @@ void proc_init(void)
     proc_manager.proc_list.nxt_proc = NULL;
     proc_manager.proc_list.prv_proc = NULL;
     // test purpose;
-    proc_spawn_test_prog();
-    proc_spawn_test_prog();
-    proc_spawn_test_prog();
     proc_spawn_test_prog();
 }

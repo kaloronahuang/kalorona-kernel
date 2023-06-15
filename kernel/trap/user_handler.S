@@ -5,6 +5,7 @@
 .section .user_handler
 .global user_handler
 user_handler:
+    # reminder: interrupt disabled, context switching is safe;
     # temporarily save a0 to sscratch;
     csrw sscratch, a0
     # set trapframe addr to a0;
