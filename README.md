@@ -6,31 +6,37 @@ A toy kernel on RISC-V platform.
 
 ### Implemented
 
-| Module                                   | Description                                                  |
-| ---------------------------------------- | ------------------------------------------------------------ |
-| **Kernel Loader - `boot`**               |                                                              |
-| Setting up MMU                           | Making temporary page-tables for kernel address space, and jumping to kernel at virtual address space. |
-| **Console - `console`**                  | Printing info to UART device, currently through legacy SBI extension. |
-| **Device - `device`**                    |                                                              |
-| Loading Flatten Device Tree(FDT)         | Using `libfdt` to read info from the FDT given by bootloader. |
-| Detecting System Memory                  | FDT conatins the info of physical memory space(reservation, availablity). |
-| **Memory Management - `memory`**         |                                                              |
-| Memory Management for Boot Time          | Implemented `bootmem` for early stage memory allocation.     |
-| Continuous Page Allocation               | Page allocation akin to Buddy.                               |
-| Object Allocation                        | Introducing lightweight object allocator.                    |
-| **System Functionalities**               |                                                              |
-| Spinlock                                 |                                                              |
+| Module                                   | Description                                                                                                       |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **Kernel Loader - `boot`**               |                                                                                                                   |
+| Setting up MMU                           | Making temporary page-tables for kernel address space, and jumping to kernel at virtual address space.            |
+| **Console - `console`**                  | Printing info to UART device, currently through legacy SBI extension.                                             |
+| **Device - `device`**                    |                                                                                                                   |
+| Loading Flatten Device Tree(FDT)         | Using `libfdt` to read info from the FDT given by bootloader.                                                     |
+| Detecting System Memory                  | FDT conatins the info of physical memory space(reservation, availablity).                                         |
+| **Memory Management - `memory`**         |                                                                                                                   |
+| Memory Management for Boot Time          | Implemented `bootmem` for early stage memory allocation.                                                          |
+| Continuous Page Allocation               | Page allocation akin to Buddy.                                                                                    |
+| Object Allocation                        | Introducing lightweight object allocator.                                                                         |
+| **User Space - `proc`**                  |                                                                                                                   |
+| Trap/Interrupt Handling                  | Handling trap/interrupt in kernel/user space.                                                                     |
+| Timer Interrupt                          | Supported by SBI firmware, enabling time-span scheduling.                                                         |
+| Process Management                       | Create, kill and reap process control block (PCB).                                                                |
+| Context Switcher & Scheduler             | Switching between RISC-V supervisor & user mode.                                                                  |
+| System Call                              | Supporting `kill`, `exit`, `fork` and other system calls.                                                         |
+| **System Functionalities**               |                                                                                                                   |
+| Spinlock                                 |                                                                                                                   |
 | Utilities for Kernel Code - `utilities/` | Including operations such as bit operations, linked list, sorting algorithms and string/memory related functions. |
 
 ### Ongoing
 
 - User Space
+- File System
 
 ### Planned
 
 - Virtio Driver for I/O
 - Device Discovery
-- OS-level virtualization(containerization)
 
 ## Build
 
