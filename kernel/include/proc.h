@@ -76,9 +76,6 @@ bool proc_is_killed(struct proc_struct *p);
 void proc_exit(int status_code);
 int proc_fork(void);
 int proc_kill(int pid);
-void proc_wait();
-void proc_sleep();
-void proc_wakeup();
 
 void proc_init(void);
 
@@ -97,8 +94,6 @@ void scheduler_yield(void);
 #define SYSCALL_CODE_EXIT 1
 #define SYSCALL_CODE_FORK 2
 #define SYSCALL_CODE_KILL 3
-#define SYSCALL_CODE_WAIT 4
-#define SYSCALL_CODE_SLEEP 5
 
 void syscall_handler(void);
 #ifdef KERNEL_DEBUG_MODE
@@ -107,7 +102,5 @@ uint64 sys_debug_yell(void);
 uint64 sys_exit(void);
 uint64 sys_fork(void);
 uint64 sys_kill(void);
-uint64 sys_wait(void);
-uint64 sys_sleep(void);
 
 #endif

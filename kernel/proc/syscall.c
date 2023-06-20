@@ -6,8 +6,6 @@ static uint64 (*syscall_handlers[])(void) = {
     [SYSCALL_CODE_EXIT] sys_exit,
     [SYSCALL_CODE_FORK] sys_fork,
     [SYSCALL_CODE_KILL] sys_kill,
-    [SYSCALL_CODE_WAIT] sys_wait,
-    [SYSCALL_CODE_SLEEP] sys_sleep,
 #ifdef KERNEL_DEBUG_MODE
     [SYSCALL_CODE_DEBUG_YELL] sys_debug_yell
 #endif
@@ -24,14 +22,8 @@ uint64 sys_fork(void) { return proc_fork(); }
 
 uint64 sys_kill(void)
 {
-}
-
-uint64 sys_wait(void)
-{
-}
-
-uint64 sys_sleep(void)
-{
+    struct trapframe_struct *frame = current_hart()->running_proc->trapframe;
+    return proc_kill(frame->a1);
 }
 
 uint64 sys_debug_yell(void)
