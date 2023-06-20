@@ -10,6 +10,23 @@
 #include <proc.h>
 #include <signal.h>
 
+struct spinlock tick_lock;
+ulong tick;
+
+void tick_init(void)
+{
+    spinlock_init(&tick_lock, "tick_lock");
+    tick = 0;
+}
+
+void tick_handler(void)
+{
+    spinlock_acquire(&tick_lock);
+    tick++;
+    proc_wakeup(&tick);
+    spinlock_release(&tick_lock);
+}
+
 void ktrap_install_handler(void) { w_stvec((uint64)kernel_handler); }
 
 void ktrap_handler(void)
@@ -24,6 +41,8 @@ void ktrap_handler(void)
         // timer trap;
         // schedule next interrupt;
         ktrap_schedule_timer(SCHEDULING_TIME_SPAN);
+        if (current_hart_id() == 0)
+            tick_handler();
         if (current_hart()->running_proc != NULL && current_hart()->running_proc->state == PROC_RUNNING)
             scheduler_yield();
         break;
@@ -52,6 +71,8 @@ void utrap_handler(void)
         // timer trap;
         // schedule next interrupt;
         ktrap_schedule_timer(SCHEDULING_TIME_SPAN);
+        if (current_hart_id() == 0)
+            tick_handler();
         scheduler_yield();
         break;
     case SCAUSE_USER_ECALL:

@@ -28,6 +28,7 @@ struct proc_struct
     int exit_state;
     struct proc_struct *prv_proc;
     struct proc_struct *nxt_proc;
+    void *sleeping_chan;
     /* Protected by Manager Lock - End */
 
     struct proc_struct *parent;

@@ -20,4 +20,20 @@ void spinlock_release(struct spinlock *lk);
 
 int is_holding_spinlock(struct spinlock *lk);
 
+struct sleeplock
+{
+    uint locked;
+    struct spinlock lk;
+    char *description;
+    int pid;
+};
+
+void sleeplock_init(struct sleeplock *lk, char *description);
+
+void sleeplock_acquire(struct sleeplock *lk);
+
+void sleeplock_release(struct sleeplock *lk);
+
+int is_holding_sleeplock(struct sleeplock *lk);
+
 #endif

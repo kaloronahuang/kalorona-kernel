@@ -176,6 +176,36 @@ int proc_is_killed(struct proc_struct *p)
     return killed;
 }
 
+void proc_sleep(void *chan, struct spinlock *lk)
+{
+    struct proc_struct *p = current_hart()->running_proc;
+
+    spinlock_acquire(&(proc_manager.lock));
+    spinlock_release(lk);
+    
+    p->sleeping_chan = chan;
+    p->state = PROC_SLEEPING;
+
+    spinlock_release(&(proc_manager.lock));
+
+    scheduler_switch();
+
+    spinlock_acquire(&(proc_manager.lock));
+    p->sleeping_chan = NULL;
+    spinlock_release(&(proc_manager.lock));
+
+    spinlock_acquire(lk);
+}
+
+void proc_wakeup(void *chan)
+{
+    spinlock_acquire(&(proc_manager.lock));
+    for (struct proc_struct *p = proc_manager.proc_list.nxt_proc; p != NULL; p = p->nxt_proc)
+        if (p->sleeping_chan == chan && p->state == PROC_SLEEPING)
+            p->state = PROC_RUNNABLE;
+    spinlock_release(&(proc_manager.lock));
+}
+
 void proc_exit(int status_code)
 {
     spinlock_acquire(&(proc_manager.lock));
@@ -184,15 +214,18 @@ void proc_exit(int status_code)
     // take care of children;
     for (struct proc_struct *e = proc_manager.proc_list.nxt_proc; e != NULL; e = e->nxt_proc)
         if (e->parent == p)
-            // TODO: wakeup parent;
+        {
             e->parent = proc_manager.root_proc;
+            proc_wakeup(e->parent);
+        }
 
     p->state = PROC_ZOMBIE;
     p->exit_state = status_code;
 
     spinlock_release(&(proc_manager.lock));
 
-    // wakeup parent;
+    // wakeup sleeping chan of parent;
+    proc_wakeup(p->parent);
 
     scheduler_switch();
     // no came back;
