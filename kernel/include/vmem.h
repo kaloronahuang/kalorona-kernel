@@ -134,8 +134,10 @@ void vm_hart_enable(void);
 // User VM;
 
 pagetable_t vm_user_make_pagetable(void);
+void *vm_translate(pagetable_t pgtbl, void *addr);
 void vm_uvmcpy(pagetable_t pgtbl, pagetable_t new_pgtbl, int overwite);
-void vm_memcpy(pagetable_t pgtbl, void *dst, void *vsrc, size_t size);
+void vm_memcpyin(pagetable_t pgtbl, void *dst, void *vsrc, size_t size);
+void vm_memcpyout(pagetable_t pgtbl, void *vdst, void *src, size_t size);
 
 #endif
 

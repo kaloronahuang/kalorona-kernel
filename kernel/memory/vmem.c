@@ -142,6 +142,12 @@ pagetable_t vm_user_make_pagetable(void)
     return ret;
 }
 
+void *vm_translate(pagetable_t pgtbl, void *addr)
+{
+    pte_t *entry = vm_walk(pgtbl, (ulong)addr, 0);
+    return (void *)PMA_PA2VA(PTE_PA(*entry) | ((ulong)addr & (PAGE_SIZE - 1)));
+}
+
 static void vm_uvmcpy_recursive(pagetable_t pgtbl, pagetable_t new_pgtbl, int level, int overwite)
 {
     for (ulong pn = 0; pn != (1 << PN_WIDTH); pn++)
@@ -171,16 +177,22 @@ static void vm_uvmcpy_recursive(pagetable_t pgtbl, pagetable_t new_pgtbl, int le
 
 void vm_uvmcpy(pagetable_t pgtbl, pagetable_t new_pgtbl, int overwite) { vm_uvmcpy_recursive(pgtbl, new_pgtbl, VA_N_VPN - 1, overwite); }
 
-void vm_memcpy(pagetable_t pgtbl, void *dst, void *vsrc, size_t size)
+void vm_memcpyin(pagetable_t pgtbl, void *dst, void *vsrc, size_t size)
 {
-    ulong vsrc_endpos = (ulong)vsrc + size;
-    while ((ulong)vsrc != vsrc_endpos)
+    void *dst_end = dst + size;
+    while (dst != dst_end)
     {
-        pte_t *entry = vm_walk(pgtbl, vsrc, 0);
-        ulong vsrc_addr = PMA_PA2VA((PTE_PA(*entry) << PAGE_SHIFT) + ((ulong)vsrc & (PAGE_SIZE - 1)));
-        if (((ulong)vsrc >> PAGE_SHIFT) != ((ulong)vsrc_endpos >> PAGE_SHIFT))
-            memcpy(dst, vsrc_addr, PAGE_SIZE - ((ulong)vsrc & (PAGE_SIZE - 1)));
-        else
-            memcpy(dst, vsrc_addr, vsrc_endpos - (ulong)vsrc);
+        *((char *)dst) = *(char *)vm_translate(pgtbl, vsrc);
+        dst++, vsrc++;
+    }
+}
+
+void vm_memcpyout(pagetable_t pgtbl, void *vdst, void *src, size_t size)
+{
+    void *vdst_end = vdst + size;
+    while (vdst != vdst_end)
+    {
+        *(char *)vm_translate(pgtbl, vdst) = *((char *)src);
+        vdst++, src++;
     }
 }

@@ -72,6 +72,8 @@ void proc_set_state(int pid, enum proc_state state);
 void *proc_extend_stack(int pid, int page_order);
 void *proc_extend_heap(int pid, int page_order, ulong mem_flag);
 bool proc_is_killed(struct proc_struct *p);
+void proc_sleep(void *chan, struct spinlock *lk);
+void proc_wakeup(void *chan);
 
 // call from user;
 void proc_exit(int status_code);
@@ -95,6 +97,11 @@ void scheduler_yield(void);
 #define SYSCALL_CODE_EXIT 1
 #define SYSCALL_CODE_FORK 2
 #define SYSCALL_CODE_KILL 3
+#define SYSCALL_CODE_SLEEP 4
+#define SYSCALL_CODE_UPTIME 5
+#define SYSCALL_CODE_WAIT 6
+#define SYSCALL_CODE_SBRK 7
+#define SYSCALL_CODE_GETPID 8
 
 void syscall_handler(void);
 #ifdef KERNEL_DEBUG_MODE
@@ -103,5 +110,10 @@ uint64 sys_debug_yell(void);
 uint64 sys_exit(void);
 uint64 sys_fork(void);
 uint64 sys_kill(void);
+uint64 syscall_sleep(void);
+uint64 syscall_uptime(void);
+uint64 syscall_wait(void);
+uint64 syscall_sbrk(void);
+uint64 syscall_getpid(void);
 
 #endif
