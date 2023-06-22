@@ -21,7 +21,6 @@ enum proc_state
 
 struct proc_struct
 {
-    /* Protected by Manager Lock - Begin */
     uint pid;
     enum proc_state state;
     int killed;
@@ -29,13 +28,13 @@ struct proc_struct
     struct proc_struct *prv_proc;
     struct proc_struct *nxt_proc;
     void *sleeping_chan;
-    /* Protected by Manager Lock - End */
 
     struct proc_struct *parent;
 
     void *kstack_vaddr;
     void *stack_vaddr;
     void *heap_vaddr;
+    void *program_break;
     pagetable_t pgtbl;
     struct trapframe_struct *trapframe;
     struct context_struct context;
@@ -67,6 +66,7 @@ void proc_unlink(struct proc_struct *p);
 
 int proc_create();
 struct proc_struct *proc_lock_and_find(int pid);
+void proc_reap_detached(struct proc_struct *p);
 void proc_reap(int pid);
 void proc_set_state(int pid, enum proc_state state);
 void *proc_extend_stack(int pid, int page_order);

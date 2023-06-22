@@ -114,6 +114,7 @@ typedef ulong *pagetable_t;
 
 // query for physical addr;
 pte_t *vm_walk(pagetable_t pgtbl, ulong va, int alloc);
+void *vm_translate(pagetable_t pgtbl, void *addr);
 int vm_mappages(pagetable_t pgtbl, ulong va, ulong pa, size_t siz, ulong flags);
 void vm_unmappages(pagetable_t pgtbl, ulong va, size_t page_count, int do_free);
 // entries have to be cleared before reaping pagetable;
@@ -134,10 +135,9 @@ void vm_hart_enable(void);
 // User VM;
 
 pagetable_t vm_user_make_pagetable(void);
-void *vm_translate(pagetable_t pgtbl, void *addr);
 void vm_uvmcpy(pagetable_t pgtbl, pagetable_t new_pgtbl, int overwite);
-void vm_memcpyin(pagetable_t pgtbl, void *dst, void *vsrc, size_t size);
-void vm_memcpyout(pagetable_t pgtbl, void *vdst, void *src, size_t size);
+int vm_memcpyin(pagetable_t pgtbl, void *dst, void *vsrc, size_t size);
+int vm_memcpyout(pagetable_t pgtbl, void *vdst, void *src, size_t size);
 
 #endif
 

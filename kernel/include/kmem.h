@@ -15,11 +15,11 @@
 #define PAGE_SIZE 0x1000ul
 #define PAGE_SHIFT 12
 
-#define BINARY_ROUND_UP(x, agn) (((x) + (agn)-1) & (~(agn - 1)))
-#define BINARY_ROUND_DOWN(x, agn) ((x) & (~(agn - 1)))
+#define BINARY_ROUND_UP(x, agn) (((ulong)(x) + (agn)-1) & (~(agn - 1)))
+#define BINARY_ROUND_DOWN(x, agn) ((ulong)(x) & (~(agn - 1)))
 
-#define PAGE_ROUND_UP(x) (((x) + PAGE_SIZE - 1) & (~(PAGE_SIZE - 1)))
-#define PAGE_ROUND_DOWN(x) ((x) & (~(PAGE_SIZE - 1)))
+#define PAGE_ROUND_UP(x) (((ulong)(x) + PAGE_SIZE - 1) & (~(PAGE_SIZE - 1)))
+#define PAGE_ROUND_DOWN(x) ((ulong)(x) & (~(PAGE_SIZE - 1)))
 
 #define MAX_MEM_ORDER 11
 

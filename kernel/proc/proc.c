@@ -109,15 +109,8 @@ struct proc_struct *proc_lock_and_find(int pid)
     return p;
 }
 
-void proc_reap(int pid)
+void proc_reap_detached(struct proc_struct *p)
 {
-    struct proc_struct *p = proc_lock_and_find(pid);
-    if (p == NULL)
-        return;
-    // unlink;
-    proc_detach(p);
-    spinlock_release(&(proc_manager.lock));
-
     // clear the data;
     // trapframe;
     vm_unmappages(p->pgtbl, VA_USER_TRAPFRAME_BEGIN, sizeof(struct trapframe_struct), true);
@@ -130,6 +123,18 @@ void proc_reap(int pid)
     vm_unmappages(p->pgtbl, VA_USER_BEGIN, ((ulong)p->heap_vaddr - VA_USER_BEGIN) >> PAGE_SHIFT, true);
     // free the proc;
     kmem_free((void *)p);
+}
+
+void proc_reap(int pid)
+{
+    struct proc_struct *p = proc_lock_and_find(pid);
+    if (p == NULL)
+        return;
+    // unlink;
+    proc_detach(p);
+    spinlock_release(&(proc_manager.lock));
+
+    proc_reap_detached(p);
 }
 
 void proc_set_state(int pid, enum proc_state state)
@@ -182,7 +187,7 @@ void proc_sleep(void *chan, struct spinlock *lk)
 
     spinlock_acquire(&(proc_manager.lock));
     spinlock_release(lk);
-    
+
     p->sleeping_chan = chan;
     p->state = PROC_SLEEPING;
 

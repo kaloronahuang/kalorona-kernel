@@ -177,22 +177,32 @@ static void vm_uvmcpy_recursive(pagetable_t pgtbl, pagetable_t new_pgtbl, int le
 
 void vm_uvmcpy(pagetable_t pgtbl, pagetable_t new_pgtbl, int overwite) { vm_uvmcpy_recursive(pgtbl, new_pgtbl, VA_N_VPN - 1, overwite); }
 
-void vm_memcpyin(pagetable_t pgtbl, void *dst, void *vsrc, size_t size)
+int vm_memcpyin(pagetable_t pgtbl, void *dst, void *vsrc, size_t size)
 {
     void *dst_end = dst + size;
     while (dst != dst_end)
     {
-        *((char *)dst) = *(char *)vm_translate(pgtbl, vsrc);
+        char *tmp_ptr = (char *)vm_translate(pgtbl, vsrc);
+        if (tmp_ptr != NULL)
+            *((char *)dst) = *tmp_ptr;
+        else
+            return -1;
         dst++, vsrc++;
     }
+    return 0;
 }
 
-void vm_memcpyout(pagetable_t pgtbl, void *vdst, void *src, size_t size)
+int vm_memcpyout(pagetable_t pgtbl, void *vdst, void *src, size_t size)
 {
     void *vdst_end = vdst + size;
     while (vdst != vdst_end)
     {
-        *(char *)vm_translate(pgtbl, vdst) = *((char *)src);
+        char *tmp_ptr = (char *)vm_translate(pgtbl, vdst);
+        if (tmp_ptr != NULL)
+            *tmp_ptr = *((char *)src);
+        else
+            return -1;
         vdst++, src++;
     }
+    return 0;
 }

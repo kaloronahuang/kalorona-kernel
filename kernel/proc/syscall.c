@@ -2,6 +2,7 @@
 #include <proc.h>
 #include <console.h>
 #include <trap.h>
+#include <utilities/string.h>
 
 static uint64 (*syscall_handlers[])(void) = {
 #ifdef KERNEL_DEBUG_MODE
@@ -71,12 +72,78 @@ uint64 syscall_uptime(void)
 
 uint64 syscall_wait(void)
 {
-    
+    spinlock_acquire(&(proc_manager.lock));
+    for (;;)
+    {
+        struct proc_struct *cp = current_hart()->running_proc;
+        bool children = 0;
+        int ret_pid = -1;
+        void *ret_addr = cp->trapframe->a1;
+        for (struct proc_struct *p = proc_manager.proc_list.nxt_proc; p != NULL; p = p->nxt_proc)
+            if (p->parent == cp)
+            {
+                children = true;
+                if (p->state == PROC_ZOMBIE)
+                {
+                    ret_pid = p->pid;
+                    // copy the exit_state;
+                    if (ret_addr != NULL && vm_memcpyout(cp->pgtbl, ret_addr, &(p->exit_state), sizeof(p->exit_state)) != 0)
+                    {
+                        // sth wrong with the cpy;
+                        spinlock_release(&(proc_manager.lock));
+                        return -1;
+                    }
+                    // goes fine, reap the proc;
+                    proc_detach(p);
+                    proc_reap_detached(p);
+                    spinlock_release(&(proc_manager.lock));
+                    return ret_pid;
+                }
+            }
+        if (children == 0 || proc_is_killed(cp))
+        {
+            spinlock_release(&(proc_manager.lock));
+            return -1;
+        }
+        proc_sleep(cp, &(proc_manager.lock));
+    }
 }
 
 uint64 syscall_sbrk(void)
 {
+    long delta;
+    uint64 ret = 0;
+    struct proc_struct *p = current_hart()->running_proc;
+    memcpy(&delta, &(p->trapframe->a1), sizeof(delta));
 
+    spinlock_acquire(&(proc_manager.lock));
+
+    if (delta < 0 && ((ulong)p->heap_vaddr - VA_USER_BEGIN) < -delta)
+    {
+        spinlock_release(&(proc_manager.lock));
+        return -1;
+    }
+
+    p->program_break += delta;
+    if ((ulong)p->program_break > (ulong)p->heap_vaddr)
+    {
+        // expand;
+        int page_order = 0;
+        while ((ulong)p->program_break > (ulong)p->heap_vaddr + (PAGE_SIZE << page_order))
+            page_order++;
+        void *addr = kmem_alloc_pages(page_order);
+        vm_mappages(p->pgtbl, p->heap_vaddr, PMA_VA2PA(addr), PAGE_SIZE << page_order, PTE_FLAG_R | PTE_FLAG_W | PTE_FLAG_U);
+        p->heap_vaddr += (PAGE_SIZE << page_order);
+    }
+    else if ((ulong)p->program_break <= (ulong)(p->heap_vaddr - PAGE_SIZE))
+    {
+        // shrink;
+        ulong new_end = PAGE_ROUND_UP(p->program_break);
+        ulong current_end = PAGE_ROUND_DOWN(p->heap_vaddr);
+        ulong cnt = (current_end - new_end) >> PAGE_SHIFT;
+        vm_unmappages(p->pgtbl, new_end, cnt, true);
+    }
+    spinlock_release(&(proc_manager.lock));
 }
 
 uint64 syscall_getpid(void) { return current_hart()->running_proc->pid; }

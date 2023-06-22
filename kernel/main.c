@@ -91,6 +91,8 @@ void kernel_main(int argc, char *const argv[])
         proc_init();
         // trap handler install;
         ktrap_install_handler();
+        // tick handler init;
+        tick_init();
         // filesystem;
         // load drivers;
         // multicore activating;
