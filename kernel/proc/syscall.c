@@ -23,13 +23,16 @@ uint64 sys_debug_yell(void)
     struct proc_struct *p = current_hart()->running_proc;
     printf("[sys_debug]pid #%d yelling with trapframe: \n", p->pid);
     print_buffer((void *)p->trapframe, sizeof(struct trapframe_struct));
+    printf("a0 = %p, a1 = %p, a2 = %p, a3 = %p, a4 = %p, a5 = %p, a6 = %p, a7 = %p.\n",
+           p->trapframe->a0, p->trapframe->a1, p->trapframe->a2, p->trapframe->a3,
+           p->trapframe->a4, p->trapframe->a5, p->trapframe->a6, p->trapframe->a7);
     return 0;
 }
 
 uint64 sys_exit(void)
 {
     struct trapframe_struct *frame = current_hart()->running_proc->trapframe;
-    proc_exit(frame->a1);
+    proc_exit(frame->a0);
     return 0;
 }
 
@@ -38,13 +41,13 @@ uint64 sys_fork(void) { return proc_fork(); }
 uint64 sys_kill(void)
 {
     struct trapframe_struct *frame = current_hart()->running_proc->trapframe;
-    return proc_kill(frame->a1);
+    return proc_kill(frame->a0);
 }
 
 uint64 syscall_sleep(void)
 {
     struct trapframe_struct *frame = current_hart()->running_proc->trapframe;
-    uint64 ticks = frame->a1;
+    uint64 ticks = frame->a0;
     spinlock_acquire(&tick_lock);
     uint64 start = tick;
     while (tick - start < ticks)
@@ -78,7 +81,7 @@ uint64 syscall_wait(void)
         struct proc_struct *cp = current_hart()->running_proc;
         bool children = 0;
         int ret_pid = -1;
-        void *ret_addr = cp->trapframe->a1;
+        void *ret_addr = (void *)cp->trapframe->a0;
         for (struct proc_struct *p = proc_manager.proc_list.nxt_proc; p != NULL; p = p->nxt_proc)
             if (p->parent == cp)
             {
@@ -100,7 +103,7 @@ uint64 syscall_wait(void)
                     return ret_pid;
                 }
             }
-        if (children == 0 || proc_is_killed(cp))
+        if (children == 0 || cp->killed)
         {
             spinlock_release(&(proc_manager.lock));
             return -1;
@@ -112,9 +115,8 @@ uint64 syscall_wait(void)
 uint64 syscall_sbrk(void)
 {
     long delta;
-    uint64 ret = 0;
     struct proc_struct *p = current_hart()->running_proc;
-    memcpy(&delta, &(p->trapframe->a1), sizeof(delta));
+    memcpy(&delta, &(p->trapframe->a0), sizeof(delta));
 
     spinlock_acquire(&(proc_manager.lock));
 
@@ -132,7 +134,7 @@ uint64 syscall_sbrk(void)
         while ((ulong)p->program_break > (ulong)p->heap_vaddr + (PAGE_SIZE << page_order))
             page_order++;
         void *addr = kmem_alloc_pages(page_order);
-        vm_mappages(p->pgtbl, p->heap_vaddr, PMA_VA2PA(addr), PAGE_SIZE << page_order, PTE_FLAG_R | PTE_FLAG_W | PTE_FLAG_U);
+        vm_mappages(p->pgtbl, (ulong)p->heap_vaddr, PMA_VA2PA(addr), PAGE_SIZE << page_order, PTE_FLAG_R | PTE_FLAG_W | PTE_FLAG_U);
         p->heap_vaddr += (PAGE_SIZE << page_order);
     }
     else if ((ulong)p->program_break <= (ulong)(p->heap_vaddr - PAGE_SIZE))
@@ -144,6 +146,7 @@ uint64 syscall_sbrk(void)
         vm_unmappages(p->pgtbl, new_end, cnt, true);
     }
     spinlock_release(&(proc_manager.lock));
+    return 0;
 }
 
 uint64 syscall_getpid(void) { return current_hart()->running_proc->pid; }

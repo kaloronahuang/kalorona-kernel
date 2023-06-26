@@ -23,8 +23,8 @@ void tick_handler(void)
 {
     spinlock_acquire(&tick_lock);
     tick++;
-    proc_wakeup(&tick);
     spinlock_release(&tick_lock);
+    proc_wakeup(&tick);
 }
 
 void ktrap_install_handler(void) { w_stvec((uint64)kernel_handler); }

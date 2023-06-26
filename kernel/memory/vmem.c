@@ -103,7 +103,7 @@ void vm_reap_pagetable_force(pagetable_t pgtbl)
 
 void vm_map_user_handler(pagetable_t pgtbl) { vm_mappages(pgtbl, VA_USER_USER_HANDLER_BEGIN, (ulong)KERNEL_USER_HANDLER_PA_BEGIN, VA_USER_USER_HANDLER_SIZE, PTE_FLAG_R | PTE_FLAG_X); }
 
-void vm_unmap_user_handler(pagetable_t pgtbl) { vm_unmappages(pgtbl, VA_USER_USER_HANDLER_BEGIN, VA_USER_USER_HANDLER_SIZE, false); }
+void vm_unmap_user_handler(pagetable_t pgtbl) { vm_unmappages(pgtbl, VA_USER_USER_HANDLER_BEGIN, VA_USER_USER_HANDLER_SIZE >> PAGE_SHIFT, false); }
 
 void vm_kernel_init(void)
 {
@@ -145,6 +145,8 @@ pagetable_t vm_user_make_pagetable(void)
 void *vm_translate(pagetable_t pgtbl, void *addr)
 {
     pte_t *entry = vm_walk(pgtbl, (ulong)addr, 0);
+    if (entry == NULL)
+        return NULL;
     return (void *)PMA_PA2VA(PTE_PA(*entry) | ((ulong)addr & (PAGE_SIZE - 1)));
 }
 
@@ -153,11 +155,11 @@ static void vm_uvmcpy_recursive(pagetable_t pgtbl, pagetable_t new_pgtbl, int le
     for (ulong pn = 0; pn != (1 << PN_WIDTH); pn++)
     {
         pte_t pte = pgtbl[pn];
-        if (!overwite && new_pgtbl[pn] != 0)
-            continue;
         if (pte & PTE_FLAG_V)
             if (pte & (PTE_FLAG_R | PTE_FLAG_X))
             {
+                if (!overwite && new_pgtbl[pn] != 0)
+                    continue;
                 // leaf entry;
                 // copy the content inside and re-pointing at the new page;
                 ulong new_page = (ulong)kmem_alloc_pages(0);
@@ -167,10 +169,13 @@ static void vm_uvmcpy_recursive(pagetable_t pgtbl, pagetable_t new_pgtbl, int le
             }
             else if (level > 0)
             {
-                // make a new sub pagetable;
-                pagetable_t new_subpgtble = (pagetable_t)kmem_alloc_pages(0);
-                new_pgtbl[pn] = (PA_PTE(PMA_VA2PA(new_subpgtble)) | (pte & ((1ul << PTE_FLAGS_WIDTH) - 1)));
-                vm_uvmcpy_recursive((pagetable_t)PMA_PA2VA(PTE_PA(pgtbl[pn])), new_subpgtble, level - 1, overwite);
+                if (new_pgtbl[pn] == 0)
+                {
+                    // make a new sub pagetable;
+                    pagetable_t new_subpgtble = (pagetable_t)kmem_alloc_pages(0);
+                    new_pgtbl[pn] = (PA_PTE(PMA_VA2PA(new_subpgtble)) | (pte & ((1ul << PTE_FLAGS_WIDTH) - 1)));
+                }
+                vm_uvmcpy_recursive((pagetable_t)PMA_PA2VA(PTE_PA(pgtbl[pn])), (pagetable_t)PMA_PA2VA(PTE_PA(new_pgtbl[pn])), level - 1, overwite);
             }
     }
 }
