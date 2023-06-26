@@ -1,0 +1,20 @@
+// syscall.h
+
+#ifndef SYSCALL
+
+#define SYSCALL
+
+#ifdef KERNEL_DEBUG_MODE
+#define SYSCALL_CODE_DEBUG_YELL 0
+#endif
+
+#define SYSCALL_CODE_EXIT 1
+#define SYSCALL_CODE_FORK 2
+#define SYSCALL_CODE_KILL 3
+#define SYSCALL_CODE_SLEEP 4
+#define SYSCALL_CODE_UPTIME 5
+#define SYSCALL_CODE_WAIT 6
+#define SYSCALL_CODE_SBRK 7
+#define SYSCALL_CODE_GETPID 8
+
+#endif
