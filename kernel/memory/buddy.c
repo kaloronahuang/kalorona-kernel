@@ -63,7 +63,9 @@ void *kmem_alloc_pages(ulong order)
             ulong page_pn = (PMA_VA2PA(page_vaddr) >> PAGE_SHIFT) - kmem.begin_ppn;
             list_detach((struct list_node *)page_vaddr);
             toggle_bit(kmem.free_areas[order].free_area_map, page_pn >> (order + 1));
-
+            for (ulong pn = page_pn; pn != page_pn + (1ul << order); pn++)
+                if (test_and_set_bit(kmem.mem_map, pn))
+                    panic("kmem_alloc_pages - allocated");
             ret = (void *)page_vaddr;
             break;
         }
