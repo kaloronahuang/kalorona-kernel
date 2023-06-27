@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     int pid = getpid();
     int x = uptime();
     sys_ecall(pid, x, 1, 0, 0, 0, 0, 0);
-    sleep(3000);
+    sleep(10);
     x = uptime();
     sys_ecall(pid, x, 1, 0, 0, 0, 0, 0);
 
@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
         // child;
         x = uptime();
         sys_ecall(child_pid, x, 2, 0, 0, 0, 0, 0);
-        sleep(40000);
+        sleep(20);
         x = uptime();
         sys_ecall(child_pid, x, 2, 0, 0, 0, 0, 0);
         return 4;
