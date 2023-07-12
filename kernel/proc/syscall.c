@@ -123,30 +123,34 @@ uint64 syscall_sbrk(void)
     if (delta < 0 && ((ulong)p->heap_vaddr - VA_USER_BEGIN) < -delta)
     {
         spinlock_release(&(proc_manager.lock));
-        return -1;
+        return p->program_break;
     }
 
-    p->program_break += delta;
-    if ((ulong)p->program_break > (ulong)p->heap_vaddr)
+    if ((ulong)p->program_break + delta > (ulong)p->heap_vaddr)
     {
         // expand;
         int page_order = 0;
-        while ((ulong)p->program_break > (ulong)p->heap_vaddr + (PAGE_SIZE << page_order))
+        while ((ulong)p->program_break + delta > (ulong)p->heap_vaddr + (PAGE_SIZE << page_order))
             page_order++;
         void *addr = kmem_alloc_pages(page_order);
-        vm_mappages(p->pgtbl, (ulong)p->heap_vaddr, PMA_VA2PA(addr), PAGE_SIZE << page_order, PTE_FLAG_R | PTE_FLAG_W | PTE_FLAG_U);
-        p->heap_vaddr += (PAGE_SIZE << page_order);
+        if (addr != NULL)
+        {
+            vm_mappages(p->pgtbl, (ulong)p->heap_vaddr, PMA_VA2PA(addr), PAGE_SIZE << page_order, PTE_FLAG_R | PTE_FLAG_W | PTE_FLAG_U);
+            p->heap_vaddr += (PAGE_SIZE << page_order);
+            p->program_break += delta;
+        }
     }
-    else if ((ulong)p->program_break <= (ulong)(p->heap_vaddr - PAGE_SIZE))
+    else if ((ulong)p->program_break + delta <= (ulong)(p->heap_vaddr - PAGE_SIZE))
     {
         // shrink;
+        p->program_break += delta;
         ulong new_end = PAGE_ROUND_UP(p->program_break);
         ulong current_end = PAGE_ROUND_DOWN(p->heap_vaddr);
         ulong cnt = (current_end - new_end) >> PAGE_SHIFT;
         vm_unmappages(p->pgtbl, new_end, cnt, true);
     }
     spinlock_release(&(proc_manager.lock));
-    return 0;
+    return p->program_break;
 }
 
 uint64 syscall_getpid(void) { return current_hart()->running_proc->pid; }

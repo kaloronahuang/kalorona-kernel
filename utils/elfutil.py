@@ -9,6 +9,7 @@ def dump_handler(args):
         e = ELFFile(elf_file)
         for sec in e.iter_sections():
             if sec.name == args.section_name:
+                print("entrypoint: ", hex(e.header.e_entry - sec.header.sh_addr))
                 data = sec.data()
                 print('char data[] = {', end='')
                 for b in data:

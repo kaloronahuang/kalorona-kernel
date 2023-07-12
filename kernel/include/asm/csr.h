@@ -174,6 +174,10 @@ static inline void w_sepc(uint64 x)
 #define SCAUSE_SEI (SCAUSE_INTERRUPT | 9)
 // Ecall from U-mode;
 #define SCAUSE_USER_ECALL 8
+// Load page fault;
+#define SCAUSE_LOAD_PAGE_FAULT 13
+// Store/AMO page fault;
+#define SCAUSE_STORE_PAGE_FAULT 15
 
 static inline uint64 r_scause()
 {
