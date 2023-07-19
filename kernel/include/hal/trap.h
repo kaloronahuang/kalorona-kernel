@@ -15,8 +15,9 @@ struct interruptor_struct
 
 struct irq_struct
 {
-    int interrupt_source_id;
-    void (*handler)(void);
+    int interrupt_src_id;
+    struct device_struct *dev;
+    int (*handler)(struct device_struct *);
     struct irq_struct *next;
 };
 

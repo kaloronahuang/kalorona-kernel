@@ -30,7 +30,7 @@ struct driver_struct
     // fdt_header, node_offset;
     bool (*recognize_device)(struct fdt_header *, int);
     // devId, fdt_header, node_offset;
-    void (*init)(int, struct fdt_header *, int);
+    int (*init)(int, struct fdt_header *, int);
     struct driver_struct *next;
 };
 

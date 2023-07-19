@@ -18,7 +18,7 @@ int hal_trap_register_interruptor(struct interruptor_struct *dev)
 
 int hal_trap_register_irq(struct irq_struct *irq)
 {
-    if (irq == NULL || irq->handler == NULL || irq->interrupt_source_id <= 0 || irq->interrupt_source_id > 1023)
+    if (irq == NULL || irq->handler == NULL || irq->interrupt_src_id <= 0 || irq->interrupt_src_id > 1023)
         return -1;
     irq->next = hal_trap_manager.irqs_head.next;
     hal_trap_manager.irqs_head.next->next = irq;
@@ -30,9 +30,13 @@ void hal_trap_handler(uint64 cause)
     if (hal_trap_manager.interruptor == NULL)
         return;
     uint64 irq = hal_trap_manager.interruptor->claim();
+    hal_trap_manager.interruptor->complete();
     for (struct irq_struct *i = hal_trap_manager.irqs_head.next; i != NULL; i = i->next)
-        if (i->interrupt_source_id == irq)
-            i->handler();
+        if (i->interrupt_src_id == irq)
+        {
+            i->handler(i->dev);
+            break;
+        }
 }
 
 void hal_trap_init(void)

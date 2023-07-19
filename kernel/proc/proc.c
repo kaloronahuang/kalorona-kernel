@@ -190,7 +190,8 @@ void proc_sleep(void *chan, struct spinlock *lk)
     if (lk != &(proc_manager.lock))
     {
         spinlock_acquire(&(proc_manager.lock));
-        spinlock_release(lk);
+        if (lk != NULL)
+            spinlock_release(lk);
     }
 
     p->sleeping_chan = chan;
@@ -204,7 +205,8 @@ void proc_sleep(void *chan, struct spinlock *lk)
     p->sleeping_chan = NULL;
     spinlock_release(&(proc_manager.lock));
 
-    spinlock_acquire(lk);
+    if (lk != NULL)
+        spinlock_acquire(lk);
 }
 
 void proc_wakeup(void *chan)
