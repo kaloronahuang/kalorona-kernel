@@ -95,6 +95,7 @@ void kernel_main(int argc, char *const argv[])
         tick_init();
         // filesystem;
         // load drivers;
+        device_init();
         // multicore activating;
         struct sbiret ret;
         for (int id = 0; id < MAX_CPU; id++)

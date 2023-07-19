@@ -9,6 +9,7 @@
 #include <console.h>
 #include <proc.h>
 #include <signal.h>
+#include <hal/trap.h>
 
 struct spinlock tick_lock;
 ulong tick;
@@ -46,6 +47,10 @@ void ktrap_handler(void)
         if (current_hart()->running_proc != NULL && current_hart()->running_proc->state == PROC_RUNNING)
             scheduler_yield();
         break;
+    case SCAUSE_SEI:
+        // device trap;
+        hal_trap_handler(cause);
+        break;
     default:
         printf("[trap]unknown cause: %p, stval: %p, sepc: %p\n", cause, r_stval(), sepc);
         panic("ktrap_handler\n");
@@ -76,6 +81,10 @@ void utrap_handler(void)
         if (current_hart_id() == 0)
             tick_handler();
         scheduler_yield();
+        break;
+    case SCAUSE_SEI:
+        // device trap;
+        hal_trap_handler(cause);
         break;
     case SCAUSE_USER_ECALL:
         // syscall;

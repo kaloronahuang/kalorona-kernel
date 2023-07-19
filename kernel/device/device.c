@@ -33,7 +33,7 @@ struct fdt_header *device_fdt_init(struct fdt_header *fdt)
     printf("[device]flattened device tree detected\n");
     // check and brief the device tree;
     if (fdt_check_header(fdt) != 0)
-        panic("device_init_by_fdt corrupt fdt");
+        panic("device_fdt_init corrupt fdt");
     printf("[device]fdt addr: %p\n", fdt);
     printf("[device]fdt size: %u\n", (uint32)(fdt_totalsize(fdt)));
     printf("[device]fdt version: %u\n", (uint32)(fdt_version(fdt)));
@@ -42,7 +42,7 @@ struct fdt_header *device_fdt_init(struct fdt_header *fdt)
     if ((uint32)(fdt_totalsize(fdt)) < sizeof(fdt_blob))
         memmove(fdt_blob, fdt, (uint32)(fdt_totalsize(fdt)));
     else
-        panic("device_init_by_fdt insufficient space for fdt");
+        panic("device_fdt_init insufficient space for fdt");
     fdt = (struct fdt_header *)fdt_blob;
     return fdt;
 }

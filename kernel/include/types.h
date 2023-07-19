@@ -49,6 +49,8 @@ typedef unsigned long uintptr_t;
 #define true 1
 #define false 0
 
+typedef uint64_t timestamp_t;
+
 #endif
 
 #endif
