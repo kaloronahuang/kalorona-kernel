@@ -9,8 +9,8 @@
 struct interruptor_struct
 {
     uint64 (*claim)(void);
+    void (*init)(struct irq_struct *);
     void (*complete)(void);
-    struct interruptor_struct *next;
 };
 
 struct irq_struct
@@ -20,12 +20,12 @@ struct irq_struct
     struct irq_struct *next;
 };
 
-void hal_trap_register_interruptor(struct interruptor_struct *dev);
+int hal_trap_register_interruptor(struct interruptor_struct *dev);
 
-void hal_trap_register_irq(struct irq_struct *irq);
+int hal_trap_register_irq(struct irq_struct *irq);
 
 void hal_trap_handler(uint64 cause);
 
-void hal_trap_init();
+void hal_trap_init(void);
 
 #endif

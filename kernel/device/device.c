@@ -47,7 +47,13 @@ struct fdt_header *device_fdt_init(struct fdt_header *fdt)
     return fdt;
 }
 
-// Initialize the device manager and the memory;
+// Initialize the device manager;
 void device_init(void)
 {
+    // load drivers first;
+    device_drivers_load();
+    // then detect devices, invoke their initialization;
+    device_discover();
+    // and then activate HAL;
+    hal_init();
 }

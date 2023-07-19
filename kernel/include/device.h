@@ -9,18 +9,10 @@ extern struct fdt_header *flatten_device_tree;
 
 // Device Definitions;
 
-enum device_type
-{
-    BLOCK_IO_DEVICE,
-    UART_IO_DEVICE,
-    UNRECOGNIZED_DEVICE
-};
-
 struct device_struct
 {
     char *name;
-    uint devId;
-    enum device_type devType;
+    dev_t devId;
     struct driver_struct *driver;
     void *driver_internal;
 
@@ -35,11 +27,12 @@ struct driver_struct
     char *name;
     int version;
     char *developer;
-    bool (*recognize_device)(struct fdt_header, int);
-    void (*init)(struct fdt_header, int);
+    // fdt_header, node_offset;
+    bool (*recognize_device)(struct fdt_header *, int);
+    // devId, fdt_header, node_offset;
+    void (*init)(int, struct fdt_header *, int);
+    struct driver_struct *next;
 };
-
-extern struct driver_struct device_drivers[];
 
 int device_register(struct device_struct *);
 
@@ -48,6 +41,8 @@ struct device_struct *device_alloc_device(void);
 void device_discover(void);
 
 struct fdt_header *device_fdt_init(struct fdt_header *fdt);
+
+void device_drivers_load(void);
 
 void device_init(void);
 

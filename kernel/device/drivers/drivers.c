@@ -1,6 +1,12 @@
 // drivers.c
 #include <device.h>
 
-struct driver_struct device_drivers[] = {
+struct driver_manager_struct
+{
 
 };
+
+void device_drivers_load(void)
+{
+
+}

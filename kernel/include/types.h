@@ -50,6 +50,7 @@ typedef unsigned long uintptr_t;
 #define false 0
 
 typedef uint64_t timestamp_t;
+typedef uint32_t dev_t;
 
 #endif
 
