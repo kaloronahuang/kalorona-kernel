@@ -1,40 +1,7 @@
 
-OBJS = \
-	asm/sbi.o \
-	asm/hart.o \
-	boot/entry.o \
-	boot/entrypoint.o \
-	boot/setup_mmu.o \
-	console/print.o \
-	device/drivers/ns16550a/ns16550a.o \
-	device/drivers/plic/plic.o \
-	device/drivers/drivers.o \
-	device/hal/trap.o \
-	device/hal/uart_io.o \
-	device/hal.o \
-	device/device.o \
-	device/memory.o \
-	memory/buddy.o \
-	memory/bootmem.o \
-	memory/kmem.o \
-	memory/object.o \
-	memory/vmem.o \
-	proc/proc.o \
-	proc/proc_switch.o \
-	proc/scheduler.o \
-	proc/syscall.o \
-	trap/trap.o \
-	trap/kernel_handler.o \
-	trap/user_handler.o \
-	utilities/algorithm/qsort.o \
-	utilities/algorithm/list.o \
-	utilities/string.o \
-	utilities/bytes.o \
-	kimage_defs.o \
-	spinlock.o \
-	signal.o \
-	vkernel_entry.o \
-	main.o
+C_FILES = $(shell find ./ -name "*.c" -printf '%P\n')
+EXCLUDED_S_FILES = kernel.lds.S
+S_FILES = $(filter-out $(EXCLUDED_S_FILES), $(shell find ./ -name "*.S" -printf '%P\n'))
 
 INCLUDE_DIR = include/
 
@@ -55,11 +22,9 @@ LD_FLAGS = -z max-page-size=4096
 LIBFDT_DIR = device/libfdt
 include $(LIBFDT_DIR)/Makefile.libfdt
 INCLUDE_DIR += $(LIBFDT_DIR)
-OBJS += $(addprefix $(LIBFDT_DIR)/, $(LIBFDT_OBJS))
 
 # Sum up;
 
-D_FILES = $(OBJS:%.o=%.d)
 INCLUDE_PARAMS = $(foreach d, $(INCLUDE_DIR), -I$d)
 CFLAGS += $(INCLUDE_PARAMS)
 
@@ -72,33 +37,37 @@ ifeq ($(UNAME_S),Darwin)
 	READELF = /usr/local/opt/binutils/bin/greadelf 
 endif
 
-%.ld: %.lds.S
+OBJS = $(C_FILES:%=%.o) $(S_FILES:%=%.o)
+BUILD_OBJS = $(addprefix build/, $(OBJS))
+
+all: build/fs.img kernel-elf-report qemu-dump-dtb
+
+build/fs.img: build build/kernel.elf scripts/boot.scr
+	sudo sh scripts/mkfs.sh
+
+build:
+	mkdir -p $@
+
+build/%.ld: %.lds.S
 	$(CC) $(INCLUDE_PARAMS) -E -P -x c $< > $@
 
-%.o: %.S
+build/%.o: %
+	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-build/kernel.elf: $(OBJS) kernel.ld
-	mkdir build/
-	$(LD) $(LD_FLAGS) -T kernel.ld -o build/kernel.elf $(OBJS)
+build/kernel.elf: build $(BUILD_OBJS) build/kernel.ld
+	$(LD) $(LD_FLAGS) -T build/kernel.ld -o build/kernel.elf $(BUILD_OBJS)
 
 scripts/boot.scr: scripts/boot.script
 	mkimage -c none -A riscv -T script -d scripts/boot.script scripts/boot.scr
 
-build/fs.img: build/kernel.elf scripts/boot.scr
-	sudo sh scripts/mkfs.sh
+kernel: build/fs.img | build
 
-kernel: build/fs.img
-
-kernel-image-report: build/kernel.elf
+kernel-elf-report: build/kernel.elf
 	$(READELF) -a build/kernel.elf > build/report
 
 clean:
-	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
-	*/*.d */*.asm */*.sym *.ld \
-	$(OBJS) \
-	$(D_FILES) \
-	scripts/boot.scr
+	rm -f scripts/boot.scr
 	rm -rf build/
 
 QEMU = qemu-system-riscv64
@@ -121,8 +90,8 @@ qemu-uboot: build/fs.img
 	$(QEMU) $(QEMU_MACHINE_FLAGS) $(UBOOT_FLAGS) $(KERNEL_FS_FLAGS)
 
 qemu-dump-dtb:
-	$(QEMU) $(QEMU_MACHINE_FLAGS) $(UBOOT_FLAGS) $(KERNEL_FS_FLAGS) -machine dumpdtb=qemu.dtb
-	dtc -o qemu.dts -O dts -I dtb qemu.dtb
+	$(QEMU) $(QEMU_MACHINE_FLAGS) $(UBOOT_FLAGS) $(KERNEL_FS_FLAGS) -machine dumpdtb=build/qemu.dtb
+	dtc -o build/qemu.dts -O dts -I dtb build/qemu.dtb
 
 qemu-debug-sbi: build/kernel.elf
 	echo "Now QEMU started with debugging port binded at $(GDB_PORT)"

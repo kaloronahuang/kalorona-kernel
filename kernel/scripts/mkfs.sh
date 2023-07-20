@@ -4,7 +4,7 @@
 BUILD_DIR=$PWD/build
 FS=$BUILD_DIR/fs
 
-mkdir $FS
+mkdir -p $FS
 
 # Place empty image;
 cp $PWD/scripts/empty_fs.img $BUILD_DIR/fs.img
