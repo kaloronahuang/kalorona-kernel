@@ -4,6 +4,7 @@
 #include <kmem.h>
 #include <hal/trap.h>
 #include <proc.h>
+#include <hal/uart_io.h>
 
 // Macros for UART driver;
 
@@ -37,6 +38,7 @@
 #define UART_LSR_TX_IDLE (1 << 5)
 
 #define TX_BUFFER_SIZE 64
+#define RX_BUFFER_SIZE 64
 
 struct ns16550a_internal_struct
 {
@@ -47,8 +49,11 @@ struct ns16550a_internal_struct
     uint64 reg_size;
 
     struct spinlock tx_lock;
+    struct spinlock rx_lock;
     char tx_buffer[TX_BUFFER_SIZE];
+    char rx_buffer[RX_BUFFER_SIZE];
     ulong tx_buffer_head, tx_buffer_tail;
+    ulong rx_buffer_head, rx_buffer_tail;
 };
 
 bool ns16550a_driver_recognize_device(struct fdt_header *fdt, int node_offset);
@@ -97,7 +102,7 @@ void ns16550a_driver_putc_sync(struct device_struct *dev, char c)
     popoff_hart();
 }
 
-int ns16550a_driver_getc(struct device_struct *dev)
+char ns16550a_driver_getc(struct device_struct *dev)
 {
     struct ns16550a_internal_struct *u = (struct ns16550a_internal_struct *)dev->driver_internal;
     if ((*UART_REG(u->reg_base, UART_LCR)) & 0x01)
@@ -106,13 +111,28 @@ int ns16550a_driver_getc(struct device_struct *dev)
         return -1;
 }
 
+char ns16550a_driver_readc(struct device_struct *dev)
+{
+    struct ns16550a_internal_struct *u = (struct ns16550a_internal_struct *)dev->driver_internal;
+    spinlock_acquire(&(u->rx_lock));
+    while (u->rx_buffer_head == u->rx_buffer_tail)
+        // empty;
+        proc_sleep(&(u->rx_buffer_head), &(u->rx_lock));
+    char ret = u->rx_buffer[u->rx_buffer_head % RX_BUFFER_SIZE];
+    u->rx_buffer_head++;
+    spinlock_release(&(u->rx_lock));
+    return ret;
+}
+
 int ns16550a_driver_interrupt_handler(struct device_struct *dev)
 {
     struct ns16550a_internal_struct *u = (struct ns16550a_internal_struct *)dev->driver_internal;
     char rec_c = ns16550a_driver_getc(dev);
     while (rec_c != -1)
     {
-        // TODO: inform the HAL;
+        u->rx_buffer[u->rx_buffer_tail % RX_BUFFER_SIZE] = rec_c;
+        u->rx_buffer_tail++;
+        proc_wakeup(&(u->rx_buffer_head));
         rec_c = ns16550a_driver_getc(dev);
     }
     spinlock_acquire(&(u->tx_lock));
@@ -137,6 +157,15 @@ struct device_struct *ns16550a_driver_init(int devId, struct fdt_header *fdt, in
         kmem_free(u);
         return NULL;
     }
+    struct irq_struct *u_irq = kmem_alloc(sizeof(struct irq_struct));
+    if (u_irq == NULL)
+    {
+        kmem_free(u), kmem_free(dev);
+        return NULL;
+    }
+    struct hal_uart_device_struct *hal_u = kmem_alloc(sizeof(struct hal_uart_device_struct));
+    if (u_irq == NULL)
+        goto error_cleanup;
 
     u->devId = devId;
 
@@ -165,9 +194,6 @@ struct device_struct *ns16550a_driver_init(int devId, struct fdt_header *fdt, in
     dev->children = dev->parent = dev->next = NULL;
 
     // register the irq event;
-    struct irq_struct *u_irq = kmem_alloc(sizeof(struct irq_struct));
-    if (u_irq == NULL)
-        goto error_cleanup;
     u_irq->handler = ns16550a_driver_interrupt_handler;
     u_irq->interrupt_src_id = u->interrupt_src_id;
     u_irq->dev = dev;
@@ -180,6 +206,7 @@ struct device_struct *ns16550a_driver_init(int devId, struct fdt_header *fdt, in
     // init the device;
     // - init the spinlock;
     spinlock_init(&(u->tx_lock), "ns16550a_tx_lock");
+    spinlock_init(&(u->rx_lock), "ns16550a_rx_lock");
     // - disable the interrupt for now;
     *UART_REG(u->reg_base, UART_IER) = 0;
     // - set the baud rate;
@@ -193,11 +220,16 @@ struct device_struct *ns16550a_driver_init(int devId, struct fdt_header *fdt, in
     *UART_REG(u->reg_base, UART_FCR) = (UART_FCR_FIFO_ENABLE | UART_FCR_FIFO_CLEAR);
     *UART_REG(u->reg_base, UART_IER) = (UART_IER_TX_ENABLE | UART_IER_RX_ENABLE);
 
-    // TODO: register on the HAL;
+    // HAL registry;
+    hal_u->dev = dev;
+    hal_u->write = ns16550a_driver_putc_async;
+    hal_u->read = ns16550a_driver_readc;
+    hal_uart_register_device(hal_u);
     return dev;
 
 error_cleanup:
     kmem_free(u);
     kmem_free(dev);
+    kmem_free(hal_u);
     return NULL;
 }
