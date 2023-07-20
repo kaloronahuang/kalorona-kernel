@@ -97,7 +97,7 @@ void utrap_handler(void)
     case SCAUSE_STORE_PAGE_FAULT:
     case SCAUSE_LOAD_PAGE_FAULT:
         // check the stack first;
-        if (tval >= p->stack_vaddr - VA_USER_STACK_AUTO_EXPAND_THRESHOLD && tval < VA_USER_TRAPFRAME_BEGIN)
+        if (tval >= (ulong)(p->stack_vaddr - VA_USER_STACK_AUTO_EXPAND_THRESHOLD) && tval < VA_USER_TRAPFRAME_BEGIN)
             proc_extend_stack(p->pid, 0);
         else
             goto Unhandled_Trap;

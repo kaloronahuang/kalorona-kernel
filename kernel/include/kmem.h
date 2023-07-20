@@ -97,7 +97,7 @@ void kmem_object_header_insert(struct kmem_object_header_struct *head, struct km
 
 struct kmem_object_manager_struct
 {
-    char *block_name;
+    const char *block_name;
     size_t object_size;
 
     struct spinlock lock;

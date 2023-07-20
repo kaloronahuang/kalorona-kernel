@@ -29,19 +29,20 @@ void hal_trap_handler(uint64 cause)
 {
     if (hal_trap_manager.interruptor == NULL)
         return;
-    uint64 irq = hal_trap_manager.interruptor->claim();
-    hal_trap_manager.interruptor->complete();
+    struct device_struct *dev = hal_trap_manager.interruptor->dev;
+    uint64 irq = hal_trap_manager.interruptor->claim(dev);
     for (struct irq_struct *i = hal_trap_manager.irqs_head.next; i != NULL; i = i->next)
         if (i->interrupt_src_id == irq)
         {
             i->handler(i->dev);
             break;
         }
+    hal_trap_manager.interruptor->complete(dev, irq);
 }
 
 void hal_trap_init(void)
 {
     // device drivers already activated and configured the HAL;
     if (hal_trap_manager.interruptor != NULL)
-        hal_trap_manager.interruptor->init(&(hal_trap_manager.irqs_head));
+        hal_trap_manager.interruptor->init(hal_trap_manager.interruptor->dev, &(hal_trap_manager.irqs_head));
 }

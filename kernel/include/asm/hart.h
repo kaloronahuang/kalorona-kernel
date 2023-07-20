@@ -69,6 +69,7 @@ struct trapframe_struct
 
 struct hart_struct
 {
+    bool enabled;
     struct proc_struct *running_proc;
     struct context_struct context;
     int trap_pushoff_dep;

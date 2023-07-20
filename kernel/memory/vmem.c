@@ -156,6 +156,7 @@ static void vm_uvmcpy_recursive(pagetable_t pgtbl, pagetable_t new_pgtbl, int le
     {
         pte_t pte = pgtbl[pn];
         if (pte & PTE_FLAG_V)
+        {
             if (pte & (PTE_FLAG_R | PTE_FLAG_X))
             {
                 if (!overwite && new_pgtbl[pn] != 0)
@@ -163,7 +164,7 @@ static void vm_uvmcpy_recursive(pagetable_t pgtbl, pagetable_t new_pgtbl, int le
                 // leaf entry;
                 // copy the content inside and re-pointing at the new page;
                 ulong new_page = (ulong)kmem_alloc_pages(0);
-                memcpy(new_page, PMA_PA2VA(PTE_PA(pte)), PAGE_SIZE);
+                memcpy((void *)new_page, (const void *)PMA_PA2VA(PTE_PA(pte)), PAGE_SIZE);
                 // make flags and pa together;
                 new_pgtbl[pn] = (PA_PTE(PMA_VA2PA(new_page)) | (pte & ((1ul << PTE_FLAGS_WIDTH) - 1)));
             }
@@ -177,6 +178,7 @@ static void vm_uvmcpy_recursive(pagetable_t pgtbl, pagetable_t new_pgtbl, int le
                 }
                 vm_uvmcpy_recursive((pagetable_t)PMA_PA2VA(PTE_PA(pgtbl[pn])), (pagetable_t)PMA_PA2VA(PTE_PA(new_pgtbl[pn])), level - 1, overwite);
             }
+        }
     }
 }
 

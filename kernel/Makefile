@@ -6,6 +6,12 @@ OBJS = \
 	boot/entrypoint.o \
 	boot/setup_mmu.o \
 	console/print.o \
+	device/drivers/ns16550a/ns16550a.o \
+	device/drivers/plic/plic.o \
+	device/drivers/drivers.o \
+	device/hal/trap.o \
+	device/hal/uart_io.o \
+	device/hal.o \
 	device/device.o \
 	device/memory.o \
 	memory/buddy.o \

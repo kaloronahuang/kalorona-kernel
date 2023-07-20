@@ -123,7 +123,7 @@ uint64 syscall_sbrk(void)
     if (delta < 0 && ((ulong)p->heap_vaddr - VA_USER_BEGIN) < -delta)
     {
         spinlock_release(&(proc_manager.lock));
-        return p->program_break;
+        return (uint64)p->program_break;
     }
 
     if ((ulong)p->program_break + delta > (ulong)p->heap_vaddr)
@@ -150,7 +150,7 @@ uint64 syscall_sbrk(void)
         vm_unmappages(p->pgtbl, new_end, cnt, true);
     }
     spinlock_release(&(proc_manager.lock));
-    return p->program_break;
+    return (uint64)p->program_break;
 }
 
 uint64 syscall_getpid(void) { return current_hart()->running_proc->pid; }

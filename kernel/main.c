@@ -54,7 +54,6 @@ void kernel_main(int argc, char *const argv[])
 {
     if (started_hart_count == 0)
     {
-        started_hart_count++;
         spinlock_init(&started_hart_count_lock, "");
         boot_hart_id = r_tp();
         // copy the arguments;
@@ -93,9 +92,6 @@ void kernel_main(int argc, char *const argv[])
         ktrap_install_handler();
         // tick handler init;
         tick_init();
-        // filesystem;
-        // load drivers;
-        device_init();
         // multicore activating;
         struct sbiret ret;
         for (int id = 0; id < MAX_CPU; id++)
@@ -103,7 +99,7 @@ void kernel_main(int argc, char *const argv[])
             ret = sbi_hsm_hart_get_status((ulong)id);
             if (ret.error != 0)
                 break;
-            hart_count++;
+            hart_count++, harts[id].enabled = true;
         }
         for (int id = 0; id < MAX_CPU; id++)
         {
@@ -113,6 +109,12 @@ void kernel_main(int argc, char *const argv[])
             else if (ret.error != 0)
                 break;
         }
+        // filesystem;
+        // load drivers;
+        device_init();
+        spinlock_acquire(&started_hart_count_lock);
+        started_hart_count++;
+        spinlock_release(&started_hart_count_lock);
     }
     else
     {

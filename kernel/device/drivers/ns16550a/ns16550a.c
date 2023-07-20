@@ -7,7 +7,7 @@
 
 // Macros for UART driver;
 
-#define UART_REG(base, reg_id) ((volatile unsigned char *)(base + reg_id))
+#define UART_REG(base, reg_id) ((volatile unsigned char *)(PMA_PA2VA(((ulong)base) + ((ulong)reg_id))))
 
 // receive holding register (for input bytes)
 #define UART_RHR 0
@@ -40,7 +40,7 @@
 
 struct ns16550a_internal_struct
 {
-    int devId;
+    dev_t devId;
     int interrupt_src_id;
     int clock_freq;
     uint64 reg_base;
@@ -50,6 +50,16 @@ struct ns16550a_internal_struct
     char tx_buffer[TX_BUFFER_SIZE];
     ulong tx_buffer_head, tx_buffer_tail;
 };
+
+bool ns16550a_driver_recognize_device(struct fdt_header *fdt, int node_offset);
+struct device_struct *ns16550a_driver_init(int devId, struct fdt_header *fdt, int node_offset);
+
+struct driver_struct ns16550a_driver = {
+    .developer = "Kalorona Huang",
+    .name = "NS16550A Compatible UART Driver",
+    .version = 0,
+    .init = ns16550a_driver_init,
+    .recognize_device = ns16550a_driver_recognize_device};
 
 void ns16550a_driver_flush(struct device_struct *dev)
 {
@@ -116,16 +126,16 @@ bool ns16550a_driver_recognize_device(struct fdt_header *fdt, int node_offset)
             strcmp(fdt_get_property(fdt, node_offset, "compatible", NULL)->data, "ns16550a") == 0);
 }
 
-int ns16550a_driver_init(int devId, struct fdt_header *fdt, int node_offset)
+struct device_struct *ns16550a_driver_init(int devId, struct fdt_header *fdt, int node_offset)
 {
     struct ns16550a_internal_struct *u = kmem_alloc(sizeof(struct ns16550a_internal_struct));
     if (u == NULL)
-        return -1;
+        return NULL;
     struct device_struct *dev = kmem_alloc(sizeof(struct device_struct));
     if (dev == NULL)
     {
         kmem_free(u);
-        return -1;
+        return NULL;
     }
 
     u->devId = devId;
@@ -152,14 +162,20 @@ int ns16550a_driver_init(int devId, struct fdt_header *fdt, int node_offset)
     dev->devId = devId;
     dev->driver = &ns16550a_driver;
     dev->driver_internal = (void *)u;
+    dev->children = dev->parent = dev->next = NULL;
 
     // register the irq event;
     struct irq_struct *u_irq = kmem_alloc(sizeof(struct irq_struct));
+    if (u_irq == NULL)
+        goto error_cleanup;
     u_irq->handler = ns16550a_driver_interrupt_handler;
     u_irq->interrupt_src_id = u->interrupt_src_id;
     u_irq->dev = dev;
     if (hal_trap_register_irq(u_irq) != 0)
+    {
+        kmem_free(u_irq);
         goto error_cleanup;
+    }
 
     // init the device;
     // - init the spinlock;
@@ -177,22 +193,11 @@ int ns16550a_driver_init(int devId, struct fdt_header *fdt, int node_offset)
     *UART_REG(u->reg_base, UART_FCR) = (UART_FCR_FIFO_ENABLE | UART_FCR_FIFO_CLEAR);
     *UART_REG(u->reg_base, UART_IER) = (UART_IER_TX_ENABLE | UART_IER_RX_ENABLE);
 
-    // register and quit;
-    return device_register(dev);
+    // TODO: register on the HAL;
+    return dev;
 
 error_cleanup:
-    if (u != NULL)
-        kmem_free(u);
-    if (dev != NULL)
-        kmem_free(dev);
-    if (u_irq != NULL)
-        kmem_free(u_irq);
-    return -1;
+    kmem_free(u);
+    kmem_free(dev);
+    return NULL;
 }
-
-struct driver_struct ns16550a_driver = {
-    .developer = "Kalorona Huang",
-    .name = "NS16550A Compatible UART Driver",
-    .version = 0,
-    .init = ns16550a_driver_init,
-    .recognize_device = ns16550a_driver_recognize_device};

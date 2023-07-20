@@ -78,7 +78,7 @@ int proc_create()
     p->trapframe = (struct trapframe_struct *)kmem_alloc_pages(0);
     memset(p->trapframe, 0, sizeof(struct trapframe_struct));
     p->trapframe->user_pc = VA_USER_BEGIN;
-    p->trapframe->sp = p->stack_vaddr;
+    p->trapframe->sp = (uint64)p->stack_vaddr;
     p->trapframe->kernel_sp = (uint64)p->kstack_vaddr + (PAGE_SIZE << 0);
 
     vm_mappages(p->pgtbl, VA_USER_TRAPFRAME_BEGIN, PMA_VA2PA(p->trapframe), sizeof(struct trapframe_struct), PTE_FLAG_R | PTE_FLAG_W);

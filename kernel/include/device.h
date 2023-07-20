@@ -30,13 +30,23 @@ struct driver_struct
     // fdt_header, node_offset;
     bool (*recognize_device)(struct fdt_header *, int);
     // devId, fdt_header, node_offset;
-    int (*init)(int, struct fdt_header *, int);
+    struct device_struct *(*init)(int, struct fdt_header *, int);
     struct driver_struct *next;
 };
 
-int device_register(struct device_struct *);
+struct driver_manager_struct
+{
+    struct driver_struct driver_list;
+};
 
-struct device_struct *device_alloc_device(void);
+extern struct driver_manager_struct driver_manager;
+
+struct device_manager_struct
+{
+    struct device_struct root_dev;
+};
+
+extern struct device_manager_struct device_manager;
 
 void device_discover(void);
 
