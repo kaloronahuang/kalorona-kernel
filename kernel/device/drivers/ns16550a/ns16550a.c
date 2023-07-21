@@ -142,7 +142,7 @@ int ns16550a_driver_interrupt_handler(struct device_struct *dev)
 
 bool ns16550a_driver_recognize_device(struct fdt_header *fdt, int node_offset)
 {
-    return (strcmp(fdt_get_name(fdt, node_offset, NULL), "uart") == 0 &&
+    return (strncmp(fdt_get_name(fdt, node_offset, NULL), "uart@", sizeof("uart@") - 1) == 0 &&
             strcmp(fdt_get_property(fdt, node_offset, "compatible", NULL)->data, "ns16550a") == 0);
 }
 
@@ -171,23 +171,24 @@ struct device_struct *ns16550a_driver_init(int devId, struct fdt_header *fdt, in
 
     // read the fdt;
     struct fdt_property *prop = fdt_get_property(fdt, node_offset, "interrupts", NULL);
-    if (prop == NULL || prop->len != sizeof(int))
+    if (prop == NULL || fdt32_to_cpu(prop->len) != sizeof(int))
         goto error_cleanup;
     u->interrupt_src_id = fdt32_to_cpu(*((int *)prop->data));
 
     prop = fdt_get_property(fdt, node_offset, "clock-frequency", NULL);
-    if (prop == NULL || prop->len != sizeof(int))
+    if (prop == NULL || fdt32_to_cpu(prop->len) != sizeof(int))
         goto error_cleanup;
     u->clock_freq = fdt32_to_cpu(*((int *)prop->data));
 
     prop = fdt_get_property(fdt, node_offset, "reg", NULL);
-    if (prop == NULL || prop->len != 2 * sizeof(uint64))
+    if (prop == NULL || fdt32_to_cpu(prop->len) != 2 * sizeof(uint64))
         goto error_cleanup;
     u->reg_base = fdt64_to_cpu(*((uint64 *)prop->data));
     u->reg_size = fdt64_to_cpu(*(((uint64 *)prop->data) + 1));
 
     // set device info;
     dev->name = "NS16550A Compatible UART Device";
+    dev->fdt_node_offset = node_offset;
     dev->devId = devId;
     dev->driver = &ns16550a_driver;
     dev->driver_internal = (void *)u;

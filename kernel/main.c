@@ -17,6 +17,7 @@
 #include <device/memory.h>
 #include <signal.h>
 #include <trap.h>
+#include <hal/uart_io.h>
 
 __attribute__((aligned(4096))) char vkernel_stack[VKERNEL_STACK_SIZE * MAX_CPU];
 
@@ -78,7 +79,7 @@ void kernel_main(int argc, char *const argv[])
             j += strlen(vboot_cmd.argv + j) + 1;
         }
         // load the fdt;
-        device_fdt_init(flatten_device_tree);
+        flatten_device_tree = device_fdt_init(flatten_device_tree);
         // init memory and setup bootmem;
         device_memory_init();
         bootmem_init();
@@ -112,6 +113,11 @@ void kernel_main(int argc, char *const argv[])
         // filesystem;
         // load drivers;
         device_init();
+        hal_uart_write(console.kernel_stdout_dev, "\n");
+        hal_uart_write(console.kernel_stdout_dev, "~");
+        hal_uart_write(console.kernel_stdout_dev, "~");
+        hal_uart_write(console.kernel_stdout_dev, "~");
+        hal_uart_write(console.kernel_stdout_dev, "\n");
         spinlock_acquire(&started_hart_count_lock);
         started_hart_count++;
         spinlock_release(&started_hart_count_lock);

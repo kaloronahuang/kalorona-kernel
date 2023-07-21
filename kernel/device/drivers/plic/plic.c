@@ -28,6 +28,14 @@ struct plic_internal_struct
 bool plic_driver_recognize_device(struct fdt_header *fdt, int node_offset);
 struct device_struct *plic_driver_init(int devId, struct fdt_header *fdt, int node_offset);
 
+void set_u32_map_volatile_bit(volatile uint32 *map, ulong index, int b)
+{
+    if (b)
+        map[index >> 5] |= (1 << (index & 0x1f));
+    else
+        map[index >> 5] &= (~(((uint32)1) << (index & 0x1f)));
+}
+
 struct driver_struct plic_driver = {
     .developer = "Kalorona Huang",
     .name = "RISC-V Platform Level Interrupt Controller Driver",
@@ -43,7 +51,7 @@ void plic_driver_hal_enable_src(struct device_struct *dev, int src_id)
     *(uint32 *)(PLIC_REG(u->reg_base, 4 * src_id)) = 1;
     for (int i = 0; i < MAX_CPU; i++)
         if (harts[i].enabled)
-            test_and_set_bit((uint8 *)PLIC_SENABLE(u->reg_base, i), src_id);
+            set_u32_map_volatile_bit((uint32 *)PLIC_SENABLE(u->reg_base, i), src_id, 1);
 }
 
 void plic_driver_hal_disable_src(struct device_struct *dev, int src_id)
@@ -52,7 +60,7 @@ void plic_driver_hal_disable_src(struct device_struct *dev, int src_id)
     *(uint32 *)(PLIC_REG(u->reg_base, 4 * src_id)) = 0;
     for (int i = 0; i < MAX_CPU; i++)
         if (harts[i].enabled)
-            test_and_clear_bit((uint8 *)PLIC_SENABLE(u->reg_base, i), src_id);
+            set_u32_map_volatile_bit((uint32 *)PLIC_SENABLE(u->reg_base, i), src_id, 0);
 }
 
 int plic_driver_hal_check_src_status(struct device_struct *dev, int src_id)
@@ -81,8 +89,9 @@ void plic_driver_hal_init(struct device_struct *dev, struct irq_struct *irq_list
 
 bool plic_driver_recognize_device(struct fdt_header *fdt, int node_offset)
 {
-    char compatible_str[] = "riscv,plic";
-    return (strcmp(fdt_get_name(fdt, node_offset, NULL), "interrupt-controller") == 0 &&
+    const char compatible_str[] = "riscv,plic";
+    const char intc_str[] = "interrupt-controller@";
+    return (strncmp(fdt_get_name(fdt, node_offset, NULL), intc_str, sizeof(intc_str) - 1) == 0 &&
             strncmp(fdt_get_property(fdt, node_offset, "compatible", NULL)->data, compatible_str, sizeof(compatible_str) - 1) == 0);
 }
 
@@ -106,8 +115,8 @@ struct device_struct *plic_driver_init(int devId, struct fdt_header *fdt, int no
     }
     u->devId = devId;
     // read from fdt;
-    struct fdt_property *prop = fdt_get_property(fdt, node_offset, "reg", NULL);
-    if (prop == NULL || prop->len != 2 * sizeof(uint64))
+    const struct fdt_property *prop = fdt_get_property(fdt, node_offset, "reg", NULL);
+    if (prop == NULL || fdt32_to_cpu(prop->len) != 2 * sizeof(uint64))
         goto error_cleanup;
     u->reg_base = fdt64_to_cpu(*((uint64 *)prop->data));
     u->reg_size = fdt64_to_cpu(*(((uint64 *)prop->data) + 1));
@@ -117,6 +126,7 @@ struct device_struct *plic_driver_init(int devId, struct fdt_header *fdt, int no
             *(uint32 *)(PLIC_SPRIORITY(u->reg_base, i)) = 0;
     // setup the device descriptor;
     dev->devId = devId;
+    dev->fdt_node_offset = node_offset;
     dev->driver = &plic_driver;
     dev->driver_internal = (void *)u;
     dev->name = "RISC-V Platform Level Interrupt Controller";

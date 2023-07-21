@@ -3,23 +3,25 @@
 #include <asm/sbi.h>
 #include <stdarg.h>
 #include <types.h>
+#include <hal/uart_io.h>
 
 static const char *digits = "0123456789abcdef";
 
-struct console_lock_struct console_lock;
+struct console_struct console;
 
 void console_init()
 {
-    spinlock_init(&(console_lock.lock), "console_lock");
-    console_lock.locking_enabled = 1;
+    spinlock_init(&(console.lock), "console_lock");
+    console.locking_enabled = 1;
     printf("[console]console initialized.\n");
 }
 
 static void print_char(char c)
 {
-    // TODO: Waiting for UART support;
-    // Using SBI ecall for temporary use;
-    sbi_legacy_console_putchar(c);
+    if (console.kernel_stdout_dev == NULL)
+        sbi_legacy_console_putchar(c);
+    else
+        hal_uart_write(console.kernel_stdout_dev, c);
 }
 
 static void print_uint(uint64 x, uint64 base)
@@ -46,19 +48,19 @@ static void print_int(int64 x, uint64 base)
 
 void putchar(const char c)
 {
-    if (console_lock.locking_enabled)
-        spinlock_acquire(&(console_lock.lock));
+    if (console.locking_enabled)
+        spinlock_acquire(&(console.lock));
     print_char(c);
-    if (console_lock.locking_enabled)
-        spinlock_release(&(console_lock.lock));
+    if (console.locking_enabled)
+        spinlock_release(&(console.lock));
 }
 
 int printf(const char *fmt, ...)
 {
     if (fmt == NULL)
         return -1;
-    if (console_lock.locking_enabled)
-        spinlock_acquire(&(console_lock.lock));
+    if (console.locking_enabled)
+        spinlock_acquire(&(console.lock));
     va_list ap;
     va_start(ap, fmt);
     for (int i = 0; fmt[i]; i++)
@@ -105,15 +107,15 @@ int printf(const char *fmt, ...)
         }
     }
 
-    if (console_lock.locking_enabled)
-        spinlock_release(&(console_lock.lock));
+    if (console.locking_enabled)
+        spinlock_release(&(console.lock));
     return 0;
 }
 
 void print_buffer(void *buf, size_t size)
 {
-    if (console_lock.locking_enabled)
-        spinlock_acquire(&(console_lock.lock));
+    if (console.locking_enabled)
+        spinlock_acquire(&(console.lock));
     for (size_t i = 0; i != size; i++)
     {
         if (*((uint8 *)(buf + i)) < 16)
@@ -124,6 +126,6 @@ void print_buffer(void *buf, size_t size)
             print_char('\n');
     }
     print_char('\n');
-    if (console_lock.locking_enabled)
-        spinlock_release(&(console_lock.lock));
+    if (console.locking_enabled)
+        spinlock_release(&(console.lock));
 }

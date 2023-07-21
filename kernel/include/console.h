@@ -6,13 +6,15 @@
 #include <types.h>
 #include <lock.h>
 
-struct console_lock_struct
+struct console_struct
 {
     struct spinlock lock;
     int locking_enabled;
+    struct device_struct *kernel_stdout_dev;
+    struct device_struct *kernel_stdin_dev;
 };
 
-extern struct console_lock_struct console_lock;
+extern struct console_struct console;
 
 void console_init();
 

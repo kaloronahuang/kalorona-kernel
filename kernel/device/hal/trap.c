@@ -21,7 +21,7 @@ int hal_trap_register_irq(struct irq_struct *irq)
     if (irq == NULL || irq->handler == NULL || irq->interrupt_src_id <= 0 || irq->interrupt_src_id > 1023)
         return -1;
     irq->next = hal_trap_manager.irqs_head.next;
-    hal_trap_manager.irqs_head.next->next = irq;
+    hal_trap_manager.irqs_head.next = irq;
     return 0;
 }
 

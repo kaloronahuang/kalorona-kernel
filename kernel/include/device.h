@@ -12,6 +12,7 @@ extern struct fdt_header *flatten_device_tree;
 struct device_struct
 {
     char *name;
+    int fdt_node_offset;
     dev_t devId;
     struct driver_struct *driver;
     void *driver_internal;
@@ -47,6 +48,8 @@ struct device_manager_struct
 };
 
 extern struct device_manager_struct device_manager;
+
+struct device_struct *device_find_dev_by_fdt_offset(struct fdt_header *fdt, int node_offset);
 
 void device_discover(void);
 

@@ -118,18 +118,21 @@ char *strncpy(char *dst, const char *src, size_t siz)
     return ret;
 }
 
-int strcmp(const char *lhs, const char *rhs)
+int strcmp(const char *l, const char *r)
 {
-    while (*lhs == *rhs && *lhs != '\0')
-        lhs++, rhs++;
-    return *lhs - *rhs;
+    for (; *l == *r && *l; l++, r++)
+        ;
+    return *(unsigned char *)l - *(unsigned char *)r;
 }
 
-int strncmp(const char *lhs, const char *rhs, size_t siz)
+int strncmp(const char *_l, const char *_r, size_t n)
 {
-    while (*lhs == *rhs && *lhs != '\0' && siz--)
-        lhs++, rhs++;
-    return *lhs - *rhs;
+    const unsigned char *l = (void *)_l, *r = (void *)_r;
+    if (!n--)
+        return 0;
+    for (; *l && *r && n && *l == *r; l++, r++, n--)
+        ;
+    return *l - *r;
 }
 
 static inline unsigned char __tolower(unsigned char c)
