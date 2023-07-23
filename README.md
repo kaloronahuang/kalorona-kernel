@@ -6,6 +6,8 @@ A toy kernel on RISC-V platform.
 
 ### Implemented
 
+**Kernel Features**
+
 | Module                                   | Description                                                                                                       |
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | **Kernel Loader - `boot`**               |                                                                                                                   |
@@ -14,6 +16,9 @@ A toy kernel on RISC-V platform.
 | **Device - `device`**                    |                                                                                                                   |
 | Loading Flatten Device Tree(FDT)         | Using `libfdt` to read info from the FDT given by bootloader.                                                     |
 | Detecting System Memory                  | FDT conatins the info of physical memory space(reservation, availablity).                                         |
+| Hardware Abstraction Layer(HAL)          | Console, filesystem etc are able to call hardware through HAL, directing hardware requests to drivers.            |
+| Drivers                                  | Supporting RISC-V PLIC and ns16550a Compatible UART device.                                                       |
+| Loading Drivers While Walking on FDT     | Device discovery, driver loading and device initialization.                                                       |
 | **Memory Management - `memory`**         |                                                                                                                   |
 | Memory Management for Boot Time          | Implemented `bootmem` for early stage memory allocation.                                                          |
 | Continuous Page Allocation               | Page allocation akin to Buddy.                                                                                    |
@@ -28,15 +33,20 @@ A toy kernel on RISC-V platform.
 | Spinlock                                 |                                                                                                                   |
 | Utilities for Kernel Code - `utilities/` | Including operations such as bit operations, linked list, sorting algorithms and string/memory related functions. |
 
+**User SDK**
+
+Basic system calls and string utility functions.
+
 ### Ongoing
 
 - User Space
 - File System
+- Virtio Driver for I/O
+- Device Discovery
 
 ### Planned
 
-- Virtio Driver for I/O
-- Device Discovery
+Nothing for now.
 
 ## Build
 
