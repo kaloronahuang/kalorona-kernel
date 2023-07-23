@@ -33,6 +33,6 @@ char hal_uart_read(struct device_struct *dev)
 {
     struct hal_uart_device_struct *udev = hal_uart_find_device(dev);
     if (udev == NULL)
-        return;
+        return -1;
     return udev->read(dev);
 }

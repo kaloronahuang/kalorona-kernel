@@ -44,6 +44,8 @@ void ktrap_handler(void)
         ktrap_schedule_timer(SCHEDULING_TIME_SPAN);
         if (current_hart_id() == 0)
             tick_handler();
+        // ACK for timer trap;
+        w_sip(r_sip() & ~32);
         if (current_hart()->running_proc != NULL && current_hart()->running_proc->state == PROC_RUNNING)
             scheduler_yield();
         break;
@@ -80,6 +82,7 @@ void utrap_handler(void)
         ktrap_schedule_timer(SCHEDULING_TIME_SPAN);
         if (current_hart_id() == 0)
             tick_handler();
+        w_sip(r_sip() & ~32);
         scheduler_yield();
         break;
     case SCAUSE_SEI:

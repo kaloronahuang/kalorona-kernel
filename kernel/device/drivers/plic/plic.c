@@ -45,7 +45,7 @@ struct driver_struct plic_driver = {
 
 // HAL event handlers;
 
-void plic_driver_hal_enable_src(struct device_struct *dev, int src_id)
+void plic_driver_hal_enable_src(struct device_struct *dev, uint src_id)
 {
     struct plic_internal_struct *u = (struct plic_internal_struct *)dev->driver_internal;
     *(uint32 *)(PLIC_REG(u->reg_base, 4 * src_id)) = 1;
@@ -54,7 +54,7 @@ void plic_driver_hal_enable_src(struct device_struct *dev, int src_id)
             set_u32_map_volatile_bit((uint32 *)PLIC_SENABLE(u->reg_base, i), src_id, 1);
 }
 
-void plic_driver_hal_disable_src(struct device_struct *dev, int src_id)
+void plic_driver_hal_disable_src(struct device_struct *dev, uint src_id)
 {
     struct plic_internal_struct *u = (struct plic_internal_struct *)dev->driver_internal;
     *(uint32 *)(PLIC_REG(u->reg_base, 4 * src_id)) = 0;
@@ -63,7 +63,7 @@ void plic_driver_hal_disable_src(struct device_struct *dev, int src_id)
             set_u32_map_volatile_bit((uint32 *)PLIC_SENABLE(u->reg_base, i), src_id, 0);
 }
 
-int plic_driver_hal_check_src_status(struct device_struct *dev, int src_id)
+int plic_driver_hal_check_src_status(struct device_struct *dev, uint src_id)
 {
     struct plic_internal_struct *u = (struct plic_internal_struct *)dev->driver_internal;
     return *(uint32 *)(PLIC_REG(u->reg_base, 4 * src_id));
@@ -75,7 +75,7 @@ uint64 plic_driver_hal_claim(struct device_struct *dev)
     return *(uint32 *)(PLIC_SCLAIM(u->reg_base, current_hart_id()));
 }
 
-void plic_driver_hal_complete(struct device_struct *dev, int irq_id)
+void plic_driver_hal_complete(struct device_struct *dev, uint irq_id)
 {
     struct plic_internal_struct *u = (struct plic_internal_struct *)dev->driver_internal;
     *(uint32 *)(PLIC_SCLAIM(u->reg_base, current_hart_id())) = irq_id;

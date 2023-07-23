@@ -31,13 +31,16 @@ void hal_trap_handler(uint64 cause)
         return;
     struct device_struct *dev = hal_trap_manager.interruptor->dev;
     uint64 irq = hal_trap_manager.interruptor->claim(dev);
-    for (struct irq_struct *i = hal_trap_manager.irqs_head.next; i != NULL; i = i->next)
-        if (i->interrupt_src_id == irq)
-        {
-            i->handler(i->dev);
-            break;
-        }
-    hal_trap_manager.interruptor->complete(dev, irq);
+    if (irq)
+    {
+        for (struct irq_struct *i = hal_trap_manager.irqs_head.next; i != NULL; i = i->next)
+            if (i->interrupt_src_id == irq)
+            {
+                i->handler(i->dev);
+                break;
+            }
+        hal_trap_manager.interruptor->complete(dev, irq);
+    }
 }
 
 void hal_trap_init(void)

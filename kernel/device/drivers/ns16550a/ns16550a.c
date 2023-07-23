@@ -37,8 +37,8 @@
 // THR can accept another character to send
 #define UART_LSR_TX_IDLE (1 << 5)
 
-#define TX_BUFFER_SIZE 64
-#define RX_BUFFER_SIZE 64
+#define TX_BUFFER_SIZE 256
+#define RX_BUFFER_SIZE 256
 
 struct ns16550a_internal_struct
 {
@@ -102,10 +102,10 @@ void ns16550a_driver_putc_sync(struct device_struct *dev, char c)
     popoff_hart();
 }
 
-char ns16550a_driver_getc(struct device_struct *dev)
+int ns16550a_driver_getc(struct device_struct *dev)
 {
     struct ns16550a_internal_struct *u = (struct ns16550a_internal_struct *)dev->driver_internal;
-    if ((*UART_REG(u->reg_base, UART_LCR)) & 0x01)
+    if ((*UART_REG(u->reg_base, UART_LSR)) & 0x01)
         return *UART_REG(u->reg_base, UART_RHR);
     else
         return -1;
@@ -127,7 +127,7 @@ char ns16550a_driver_readc(struct device_struct *dev)
 int ns16550a_driver_interrupt_handler(struct device_struct *dev)
 {
     struct ns16550a_internal_struct *u = (struct ns16550a_internal_struct *)dev->driver_internal;
-    char rec_c = ns16550a_driver_getc(dev);
+    int rec_c = ns16550a_driver_getc(dev);
     while (rec_c != -1)
     {
         u->rx_buffer[u->rx_buffer_tail % RX_BUFFER_SIZE] = rec_c;
@@ -138,6 +138,7 @@ int ns16550a_driver_interrupt_handler(struct device_struct *dev)
     spinlock_acquire(&(u->tx_lock));
     ns16550a_driver_flush(dev);
     spinlock_release(&(u->tx_lock));
+    return 0;
 }
 
 bool ns16550a_driver_recognize_device(struct fdt_header *fdt, int node_offset)
@@ -170,7 +171,7 @@ struct device_struct *ns16550a_driver_init(int devId, struct fdt_header *fdt, in
     u->devId = devId;
 
     // read the fdt;
-    struct fdt_property *prop = fdt_get_property(fdt, node_offset, "interrupts", NULL);
+    const struct fdt_property *prop = fdt_get_property(fdt, node_offset, "interrupts", NULL);
     if (prop == NULL || fdt32_to_cpu(prop->len) != sizeof(int))
         goto error_cleanup;
     u->interrupt_src_id = fdt32_to_cpu(*((int *)prop->data));

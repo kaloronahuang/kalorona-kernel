@@ -20,12 +20,15 @@ static uint64 (*syscall_handlers[])(void) = {
 
 uint64 sys_debug_yell(void)
 {
+    // Syscall to test kernel code;
     struct proc_struct *p = current_hart()->running_proc;
     printf("[sys_debug]pid #%d yelling with trapframe: \n", p->pid);
     print_buffer((void *)p->trapframe, sizeof(struct trapframe_struct));
     printf("a0 = %p, a1 = %p, a2 = %p, a3 = %p, a4 = %p, a5 = %p, a6 = %p, a7 = %p.\n",
            p->trapframe->a0, p->trapframe->a1, p->trapframe->a2, p->trapframe->a3,
            p->trapframe->a4, p->trapframe->a5, p->trapframe->a6, p->trapframe->a7);
+    char c = getchar();
+    printf("System got an %c\n", c);
     return 0;
 }
 

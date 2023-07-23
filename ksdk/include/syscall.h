@@ -7,7 +7,7 @@
 
 #ifndef __ASSEMBLER__
 
-void sys_ecall(
+uint64 sys_ecall(
     ulong arg0,
     ulong arg1,
     ulong arg2,

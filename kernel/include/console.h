@@ -20,6 +20,8 @@ void console_init();
 
 void putchar(const char c);
 
+char getchar(void);
+
 int printf(const char *fmt, ...);
 
 void print_buffer(void *buf, size_t size);

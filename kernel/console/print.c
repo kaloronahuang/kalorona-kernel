@@ -55,6 +55,14 @@ void putchar(const char c)
         spinlock_release(&(console.lock));
 }
 
+char getchar(void)
+{
+    if (console.kernel_stdout_dev == NULL)
+        return -1;
+    else
+        return hal_uart_read(console.kernel_stdout_dev);
+}
+
 int printf(const char *fmt, ...)
 {
     if (fmt == NULL)
@@ -90,6 +98,9 @@ int printf(const char *fmt, ...)
             break;
         case 'u':
             print_uint(va_arg(ap, uint32), 10);
+            break;
+        case 'c':
+            print_char(va_arg(ap, int));
             break;
         case 's':
             char *s = va_arg(ap, char *);

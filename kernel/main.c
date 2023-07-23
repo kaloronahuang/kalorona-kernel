@@ -113,11 +113,6 @@ void kernel_main(int argc, char *const argv[])
         // filesystem;
         // load drivers;
         device_init();
-        hal_uart_write(console.kernel_stdout_dev, "\n");
-        hal_uart_write(console.kernel_stdout_dev, "~");
-        hal_uart_write(console.kernel_stdout_dev, "~");
-        hal_uart_write(console.kernel_stdout_dev, "~");
-        hal_uart_write(console.kernel_stdout_dev, "\n");
         spinlock_acquire(&started_hart_count_lock);
         started_hart_count++;
         spinlock_release(&started_hart_count_lock);

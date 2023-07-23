@@ -18,11 +18,11 @@ struct interruptor_struct
 {
     struct device_struct *dev;
     void (*init)(struct device_struct *, struct irq_struct *);
-    void (*enable_src)(struct device_struct *, int);
-    void (*disable_src)(struct device_struct *, int);
-    int (*check_src_status)(struct device_struct *, int);
+    void (*enable_src)(struct device_struct *, uint);
+    void (*disable_src)(struct device_struct *, uint);
+    int (*check_src_status)(struct device_struct *, uint);
     uint64 (*claim)(struct device_struct *);
-    void (*complete)(struct device_struct *, int);
+    void (*complete)(struct device_struct *, uint);
 };
 
 int hal_trap_register_interruptor(struct interruptor_struct *dev);
