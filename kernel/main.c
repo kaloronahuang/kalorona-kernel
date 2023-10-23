@@ -132,10 +132,15 @@ void kernel_main(int argc, char *const argv[])
 
     // disable identical mapping;
     if (r_tp() == boot_hart_id)
-        vm_kernel_remove_idmap(), is_idmap_removed = true;
+    {
+        vm_kernel_remove_idmap();
+        sfence_vma();
+        is_idmap_removed = true;
+        sfence_vma();
+    }
     else
-        while (!is_idmap_removed)
-            ;
+        while (sfence_vma(), !is_idmap_removed)
+            sfence_vma();
     sfence_vma();
 
     printf("[kernel] hart #%d ready\n", (int)r_tp());
