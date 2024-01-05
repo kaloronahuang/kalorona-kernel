@@ -2,10 +2,10 @@
 
 #ifndef KDRIVER_VIRTIO
 
+#define KDRIVER_VIRTIO
+
 #include <device.h>
 #include <vmem.h>
-
-#define KDRIVER_VIRTIO
 
 // VirtIO General Definitions;
 
@@ -52,6 +52,11 @@
 #define VIRTIO_MMIO_QUEUE_DEVICE_HIGH_REG(base) VIRTIO_MMIO_REG(base, 0xa4)
 // read-only;
 #define VIRTIO_MMIO_CONFIG_GENERATION_REG(base) VIRTIO_MMIO_REG(base, 0xfc)
+// read-only;
+#define VIRTIO_MMIO_CONFIG_REG(base) VIRTIO_MMIO_REG(base, 0x100)
+
+// copy in 32-bit aligned manner;
+void virtio_memcpy(void *dst, const void *src, size_t siz);
 
 // VirtIO Constants;
 
@@ -66,6 +71,15 @@
 #define VIRTIO_CONFIG_S_DRIVER 2
 #define VIRTIO_CONFIG_S_DRIVER_OK 4
 #define VIRTIO_CONFIG_S_FEATURES_OK 8
+#define VIRTIO_CONFIG_S_DEVICE_NEEDS_RESET 64
+#define VIRTIO_CONFIG_S_FAILED 128
+
+// VirtIO Legacy Interface: Reserved Feature Bits;
+#define VIRTIO_F_ANY_LAYOUT 27
+#define VIRTIO_F_INDIRECT_DESC 28
+#define VIRTIO_F_EVENT_IDX 29
+
+#define VIRTIO_NUM_QUEUE 8
 
 struct virtio_internal_struct
 {
@@ -80,6 +94,43 @@ bool virtio_driver_recognize_device(struct fdt_header *fdt, int node_offset);
 struct device_struct *virtio_driver_init(int devId, struct fdt_header *fdt, int node_offset);
 
 extern struct driver_struct virtio_driver;
+
+struct virtio_virtq_desc_struct
+{
+    uint64 addr;
+    uint32 len;
+    uint16 flags;
+    uint16 next;
+};
+
+struct virtio_virtq_avail_struct
+{
+    uint16 flags;
+    uint16 idx;
+    uint16 ring[VIRTIO_NUM_QUEUE];
+    uint16 used_event;
+};
+
+struct virtio_virtq_used_elem_struct
+{
+    uint32 id;
+    uint32 len;
+};
+
+struct virtio_virtq_used_struct
+{
+    uint16 flags;
+    uint16 idx;
+    struct virtio_virtq_used_elem_struct ring[VIRTIO_NUM_QUEUE];
+    uint16 avail_event;
+};
+
+struct virtio_virtq
+{
+    struct virtio_virtq_desc_struct *desc;
+    struct virtio_virtq_avail_struct *avail;
+    struct virtio_virtq_used_struct *used;
+};
 
 // Block Device Definitions;
 
@@ -137,6 +188,16 @@ struct virtio_blk_config
     uint32 secure_erase_sector_alignment;
 };
 
+struct virtio_blk_internal_struct
+{
+    struct virtio_internal_struct *virtio_internal;
+    struct spinlock lock;
+    uint32 supported_features;
+    struct virtio_virtq virtq;
+    bool free_map[VIRTIO_NUM_QUEUE];
+    bool read_only;
+};
+
 #define VIRTIO_BLK_T_IN 0
 #define VIRTIO_BLK_T_OUT 1
 #define VIRTIO_BLK_T_FLUSH 4
@@ -146,22 +207,9 @@ struct virtio_blk_config
 #define VIRTIO_BLK_T_WRITE_ZEROES 13
 #define VIRTIO_BLK_T_SECURE_ERASE 14
 
-struct virtio_blk_req
-{
-    uint32 type;
-    uint32 reserved;
-    uint64 sector;
-};
-
 #define VIRTIO_BLK_S_OK 0
 #define VIRTIO_BLK_S_IOERR 1
 #define VIRTIO_BLK_S_UNSUPP 2
-
-struct virtio_blk_internal_struct
-{
-    struct virtio_internal_struct virtio_info;
-    bool read_only;
-};
 
 struct device_struct *virtio_blk_driver_init(struct virtio_internal_struct *virtio_info);
 

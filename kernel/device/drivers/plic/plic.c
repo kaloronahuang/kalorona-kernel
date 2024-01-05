@@ -91,8 +91,12 @@ bool plic_driver_recognize_device(struct fdt_header *fdt, int node_offset)
 {
     const char compatible_str[] = "riscv,plic";
     const char intc_str[] = "interrupt-controller@";
-    return (strncmp(fdt_get_name(fdt, node_offset, NULL), intc_str, sizeof(intc_str) - 1) == 0 &&
-            strncmp(fdt_get_property(fdt, node_offset, "compatible", NULL)->data, compatible_str, sizeof(compatible_str) - 1) == 0);
+    const char *name = fdt_get_name(fdt, node_offset, NULL);
+    const struct fdt_property *p = fdt_get_property(fdt, node_offset, "compatible", NULL);
+    if (p == NULL || name == NULL)
+        return false;
+    return (strncmp(name, intc_str, sizeof(intc_str) - 1) == 0 &&
+            strncmp(p->data, compatible_str, sizeof(compatible_str) - 1) == 0);
 }
 
 struct device_struct *plic_driver_init(int devId, struct fdt_header *fdt, int node_offset)

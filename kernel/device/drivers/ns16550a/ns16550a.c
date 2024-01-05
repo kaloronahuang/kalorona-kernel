@@ -143,8 +143,12 @@ int ns16550a_driver_interrupt_handler(struct device_struct *dev)
 
 bool ns16550a_driver_recognize_device(struct fdt_header *fdt, int node_offset)
 {
-    return (strncmp(fdt_get_name(fdt, node_offset, NULL), "uart@", sizeof("uart@") - 1) == 0 &&
-            strcmp(fdt_get_property(fdt, node_offset, "compatible", NULL)->data, "ns16550a") == 0);
+    const char *name = fdt_get_name(fdt, node_offset, NULL);
+    const struct fdt_property *p = fdt_get_property(fdt, node_offset, "compatible", NULL);
+    if (p == NULL || name == NULL)
+        return false;
+    return (strncmp(name, "uart@", sizeof("uart@") - 1) == 0 &&
+            strcmp(p->data, "ns16550a") == 0);
 }
 
 struct device_struct *ns16550a_driver_init(int devId, struct fdt_header *fdt, int node_offset)
